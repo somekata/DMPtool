@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>DMP tool</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="wrap">
+      <div class="heroTitle">
+        <h1>DMP tool: md builder</h1>
+      </div>
+      <p class="sub">
+        論文ごとの管理簿mdを、フォーム入力だけで生成・更新します（下書きは一時的にLocalStorage）。
+      </p>
+
+      <div class="toplink">
+        <a href="howtouse.html" target="_blank" class="howtoLink">使い方</a>
+      </div>
+    </header>
+
+    <main class="wrap grid">
+      <!-- Import hub -->
+      <section class="card">
+        <h2>1) 取り込み（md / PubMed）</h2>
+
+        <div class="two">
+          <!-- Existing md import -->
+          <div>
+            <h3 class="h3">A. 既存mdを読み込んで更新（任意）</h3>
+            <div class="row">
+              <input
+                type="file"
+                id="mdFile"
+                accept=".md,text/markdown,text/plain"
+              />
+              <button id="btnLoadMd" class="btn secondary" type="button">
+                md読み込み
+              </button>
+            </div>
+            <p class="hint">
+              ※このツール専用フォーマット（YAMLフロントマター付き）で保存したmdのみ、フォーム復元できます。
+            </p>
+          </div>
+
+          <!-- NBIB import -->
+          <div>
+            <h3 class="h3">B. PubMedを読み込んで自動入力（推奨）</h3>
+            <div class="row">
+              <input type="file" id="nbibFile" accept=".nbib,.txt,text/plain" />
+              <button id="btnLoadNbib" class="btn secondary" type="button">
+                解析
+              </button>
+              <span id="nbibStatus" class="pill">未解析</span>
+            </div>
+
+            <div class="field" style="margin-top: 10px">
+              <label>レコード選択（複数論文が含まれる場合）</label>
+              <select id="nbibRecordSelect" disabled></select>
+              <p class="hint">タイトル/PMIDが見える形で表示します。</p>
+            </div>
+
+            <div class="row">
+              <button id="btnApplyNbib" class="btn" type="button" disabled>
+                選択レコードをフォームに反映
+              </button>
+              <button id="btnClearNbib" class="btn secondary" type="button">
+                情報をクリア
+              </button>
+            </div>
+
+            <div class="miniCard" id="nbibPreviewBox" aria-live="polite">
+              <div class="kv">
+                <div class="k">Title</div>
+                <div class="v" id="pvTitle">-</div>
+              </div>
+              <div class="kv">
+                <div class="k">First author</div>
+                <div class="v" id="pvAuthor">-</div>
+              </div>
+              <div class="kv">
+                <div class="k">Journal</div>
+                <div class="v" id="pvJournal">-</div>
+              </div>
+              <div class="kv">
+                <div class="k">Pub date</div>
+                <div class="v" id="pvDate">-</div>
+              </div>
+              <div class="kv">
+                <div class="k">PMID / DOI</div>
+                <div class="v" id="pvIds">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Form -->
+      <section class="card">
+        <h2>2) 入力（下書きは自動保存）</h2>
+
+        <form id="paperForm" autocomplete="off">
+          <div class="field">
+            <label>ファイル名（必須・拡張子不要）</label>
+            <input
+              id="fileBase"
+              type="text"
+              placeholder="例）2026_AB_capsule_switch"
+            />
+            <p class="hint">ここを入力すると最後に「md作成ボタン」が出ます。</p>
+          </div>
+
+          <!-- 論文タイトル（全幅） -->
+          <div class="field">
+            <label>論文タイトル</label>
+            <textarea
+              id="paperTitle"
+              rows="2"
+              placeholder="例）Capsule switching in A. baumannii ..."
+            ></textarea>
+          </div>
+
+          <!-- 略称 -->
+          <div class="field">
+            <label>略称（任意）</label>
+            <input id="paperShort" type="text" placeholder="例）ABcapSwitch" />
+          </div>
+
+          <div class="two">
+            <div class="field">
+              <label>第一著者</label>
+              <input id="firstAuthor" type="text" placeholder="例）Yamada K" />
+            </div>
+
+            <div class="field">
+              <label>最終著者</label>
+              <input id="lastAuthor" type="text" placeholder="例）Kaneko Y" />
+            </div>
+
+            <div class="field">
+              <label>責任者（対応担当）</label>
+              <input id="owner" type="text" placeholder="例）Kaneko Y" />
+            </div>
+          </div>
+
+          <div class="two">
+            <div class="field">
+              <label>ジャーナル</label>
+              <input id="journal" type="text" placeholder="例）JCM" />
+            </div>
+            <div class="field">
+              <label>公開日（YYYY-MM-DD / YYYY-MM / YYYY）</label>
+              <!-- NBIBは月までが多いので text に変更 -->
+              <input
+                id="pubDate"
+                type="text"
+                placeholder="例）2026-03-01 / 2026-03 / 2026"
+              />
+            </div>
+          </div>
+
+          <div class="two">
+            <div class="field">
+              <label>DOI / PMID（任意）</label>
+              <input
+                id="doiPmid"
+                type="text"
+                placeholder="例）doi:10.... / pmid:..."
+              />
+            </div>
+            <div class="field">
+              <label>関連プロジェクト名</label>
+              <input
+                id="project"
+                type="text"
+                placeholder="例）CRAB surveillance 2026"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>NGS Raw保存場所（参照）</label>
+            <input
+              id="ngsRawPath"
+              type="text"
+              placeholder="例）/NGS_RAW/2026_Proj_XXXX/"
+            />
+          </div>
+          <div class="field">
+            <label>解析後データ保存場所</label>
+            <input
+              id="ngsProcessedPath"
+              type="text"
+              placeholder="例）/NGS_ANALYSIS/ProjX/"
+            />
+          </div>
+
+          <div class="field">
+            <label>論文フォルダ（このmdの置き場）</label>
+            <input
+              id="paperFolderPath"
+              type="text"
+              placeholder="例）/PAPER/2026_AB_capsule_switch/"
+            />
+          </div>
+          <div class="field">
+            <label>図表・統計データ場所</label>
+            <input
+              id="figStatsPath"
+              type="text"
+              placeholder="例）/PAPER/.../Figures, /Statistics"
+            />
+          </div>
+
+          <div class="field">
+            <label>ノート番号/ページ（複数行可）</label>
+            <textarea
+              id="notebookRef"
+              rows="3"
+              placeholder="例）
+NB-23 / p34-58
+NB-24 / p10-12（追加実験）"
+            ></textarea>
+          </div>
+
+          <div class="field">
+            <label>共同研究（任意）</label>
+            <input
+              id="collab"
+              type="text"
+              placeholder="例）長崎大学 / 国立感染研"
+            />
+          </div>
+
+          <div class="two">
+            <div class="field">
+              <label>倫理・IRB（任意）</label>
+              <input id="irb" type="text" placeholder="例）2025-XXX" />
+            </div>
+            <div class="field">
+              <label>保管期限（任意）</label>
+              <input
+                id="retention"
+                type="text"
+                placeholder="例）研究終了後10年"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>メモ（自由記載）</label>
+            <textarea
+              id="notes"
+              rows="4"
+              placeholder="例）再解析条件、注意事項、外部提供条件など"
+            ></textarea>
+          </div>
+
+          <div class="row">
+            <button id="btnPreview" class="btn" type="button">
+              プレビュー更新
+            </button>
+            <button id="btnClearDraft" class="btn secondary" type="button">
+              下書き破棄（LocalStorage消去）
+            </button>
+          </div>
+
+          <div id="downloadArea" class="download hidden">
+            <p class="hint strong">
+              ファイル名が入力されたので、mdを作成できます。
+            </p>
+            <button id="btnDownload" class="btn primary" type="button">
+              mdファイル作成 & ダウンロード（保存後に下書き消去）
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Preview -->
+      <section class="card">
+        <h2>3) mdプレビュー</h2>
+        <pre id="preview" class="preview"></pre>
+        <p class="hint">
+          ※プレビューはMarkdownレンダリングではなくテキスト表示です（軽量運用）。必要ならレンダラも追加できます。
+        </p>
+      </section>
+    </main>
+
+    <footer class="wrap foot">
+      <small>Internal tool / Paper md Builder</small>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
