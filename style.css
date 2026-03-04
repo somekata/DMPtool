@@ -33,11 +33,6 @@ header{
 }
 
 header h1{
-  font-size: 30px;
-  font-weight: 800;
-}
-
-header h1{
   font-size: 32px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -329,7 +324,7 @@ input:focus, textarea:focus{
   position:absolute;
   left:50%;
   transform:translateX(-50%);
-  width:120px;
+  width: min(500px, calc(100% - 40px));
   height:3px;
   border-radius:999px;
   background: linear-gradient(90deg, var(--accent), var(--accent2));
@@ -361,4 +356,17 @@ input:focus, textarea:focus{
 
   /* Fallback */
   color: transparent;
+}
+
+label#comments {
+  font-size: 13px;
+  text-align: center;
+  color: var(--muted);
+  
+  /* ここから追加 */
+  display: block; /* 幅いっぱいに広げる */
+  padding: 10px 0; /* 線と文字の間の余白 */
+  border-top: 2px solid; /* 上線の太さ */
+  border-bottom: 2px solid; /* 下線の太さ */
+  border-image: linear-gradient(to right, transparent, var(--muted), transparent) 1;
 }

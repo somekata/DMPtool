@@ -12,7 +12,7 @@
         <h1>DMP tool: md builder</h1>
       </div>
       <p class="sub">
-        論文ごとの管理簿mdを、フォーム入力だけで生成・更新します（下書きは一時的にLocalStorage）。
+        論文や研究テーマごとの管理簿mdを、フォーム入力だけで生成・更新します（下書きは一時的にLocalStorage）。
       </p>
 
       <div class="toplink">
@@ -106,7 +106,7 @@
             <input
               id="fileBase"
               type="text"
-              placeholder="例）2026_AB_capsule_switch"
+              placeholder="例）20251101_Kaneko_ASGame"
             />
             <p class="hint">ここを入力すると最後に「md作成ボタン」が出ます。</p>
           </div>
@@ -125,6 +125,15 @@
           <div class="field">
             <label>略称（任意）</label>
             <input id="paperShort" type="text" placeholder="例）ABcapSwitch" />
+          </div>
+
+          <div class="field">
+            <label>著者（authors）</label>
+            <textarea
+              id="authors"
+              rows="2"
+              placeholder="例）Yamada K, Suzuki T, Kaneko Y"
+            ></textarea>
           </div>
 
           <div class="two">
@@ -255,8 +264,37 @@ NB-24 / p10-12（追加実験）"
             <textarea
               id="notes"
               rows="4"
-              placeholder="例）再解析条件、注意事項、外部提供条件など"
+              placeholder="例）実験者以外も追跡可能なように、フォルダ内のファイル名や、実験ノートのどのページに関連する内容が記録されているかなども記載してください。必要に応じて、再解析条件、注意事項、外部提供条件などの捕捉情報を記載してください"
             ></textarea>
+          </div>
+
+          <div class="field">
+            <p
+              class="hint"
+              style="border: 1px solid #ccc; padding: 10px; border-radius: 5px"
+            >
+              <label id="comments">留意点</label> -
+              このツールは、論文や研究テーマごとにデータを適切に管理するためのものです。md（マークダウン）ファイルを作成します。<br />
+              - PubMedに公開された場合は、一部自動入力が可能です。<br />
+              -
+              修士論文など、PubMedで公開されていない場合には、手入力してください。<br />
+              -
+              また、論文化されなかった場合でも、卒業時などにデータを管理する必要がありますので、同様に記録してください。<br />
+              -
+              学会発表の際のスライドやプレゼンテーション資料などのフォルダおよびファイル情報は、メモ欄に記録してください。<br />
+              -
+              論文や研究内容が本人以外でも追跡可能な形で記録することが重要です。<br />
+              -
+              原則として1つの論文につき1つの管理簿を作成しますが、関連するデータも同様に記録してください。<br />
+              -
+              日頃から、自身のPCや研究室のサーバーなど、どこに何のデータがあるかを整理して記録する習慣をつけることが重要です。<br />
+              -
+              学会発表のスライドなどは、「20260302_学会発表タイトル_発表者名」など、日付と内容がわかる形でファイル名をつけることを推奨します。日付を先頭に記入することで、ソートが容易になります。<br />
+              -
+              メモには、フォルダ内のファイル名や、実験ノートのどのページに関連する内容が記録されているかなども記載してください。<br />
+              -
+              研究内容が追跡可能な形で記録されていれば、必ずしも全ての項目を埋める必要はありません。必要に応じて、重要な情報を優先的に記録してください。
+            </p>
           </div>
 
           <div class="row">

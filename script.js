@@ -15,6 +15,7 @@ const FIELDS = [
   'fileBase',
   'paperTitle',
   'paperShort',
+  'authors',
   'firstAuthor',
   'lastAuthor',
   'correspondingAuthor',
@@ -113,8 +114,29 @@ function buildMd(data) {
   const updated = todayISO();
   const yaml = [
     '---',
-    'DMP tool md builder',
+    'tool: paper-md-builder',
     'version: 1.001',
+    `fileBase: "${escapeYaml(data.fileBase)}"`,
+    `paperTitle: "${escapeYaml(data.paperTitle)}"`,
+    `paperShort: "${escapeYaml(data.paperShort)}"`,
+    `authors: "${escapeYaml(data.authors)}"`,
+    `firstAuthor: "${escapeYaml(data.firstAuthor)}"`,
+    `lastAuthor: "${escapeYaml(data.lastAuthor)}"`,
+    `correspondingAuthor: "${escapeYaml(data.correspondingAuthor)}"`,
+    `journal: "${escapeYaml(data.journal)}"`,
+    `pubDate: "${escapeYaml(data.pubDate)}"`,
+    `doiPmid: "${escapeYaml(data.doiPmid)}"`,
+    `project: "${escapeYaml(data.project)}"`,
+    `collab: "${escapeYaml(data.collab)}"`,
+    `ngsRawPath: "${escapeYaml(data.ngsRawPath)}"`,
+    `ngsProcessedPath: "${escapeYaml(data.ngsProcessedPath)}"`,
+    `paperFolderPath: "${escapeYaml(data.paperFolderPath)}"`,
+    `figStatsPath: "${escapeYaml(data.figStatsPath)}"`,
+    `notebookRef: "${escapeYaml(data.notebookRef)}"`,
+    `irb: "${escapeYaml(data.irb)}"`,
+    `retention: "${escapeYaml(data.retention)}"`,
+    'notes: |',
+    indentBlock(data.notes || '', 2),
     '---',
   ].join('\n');
 
@@ -124,6 +146,7 @@ function buildMd(data) {
     '## 基本情報',
     `- ファイル名: ${safeDash(data.fileBase)}`,
     `- 略称: ${safeDash(data.paperShort)}`,
+    `- 著者: ${safeDash(data.authors)}`,
     `- 筆頭著者: ${safeDash(data.firstAuthor)}`,
     `- 最終著者: ${safeDash(data.lastAuthor)}`,
     `- 責任著者: ${safeDash(data.correspondingAuthor)}`,
@@ -269,6 +292,7 @@ async function loadMdFile() {
     fileBase: fm.fileBase ?? '',
     paperTitle: fm.paperTitle ?? '',
     paperShort: fm.paperShort ?? '',
+    authors: fm.authors ?? '',
     firstAuthor: fm.firstAuthor ?? '',
     lastAuthor: fm.lastAuthor ?? '',
     correspondingAuthor: fm.correspondingAuthor ?? '',
@@ -339,6 +363,7 @@ function parseNBIBRecord(raw) {
   // Normalize inline text to avoid "long spaces" from line wraps
   const title = normalizeInlineText(firstNonEmpty(map.TI));
   const authors = (map.AU || []).map((s) => normalizeInlineText(s)).filter(Boolean);
+  const authorsStr = authors.join(', ') ;
   const firstAuthor = normalizeInlineText(authors[0] || '');
   const lastAuthor = normalizeInlineText(authors[authors.length - 1] || '');
   const journal = normalizeInlineText(firstNonEmpty(map.TA) || firstNonEmpty(map.JT) || '');
@@ -348,7 +373,7 @@ function parseNBIBRecord(raw) {
   const doi = normalizeInlineText(extractDOI(map));
   const doiPmid = normalizeInlineText(joinDoiPmid(pmid, doi));
 
-  const fields = { title, firstAuthor, lastAuthor, journal, pubDate, pmid, doi, doiPmid };
+  const fields = { title, authors: authorsStr, firstAuthor, lastAuthor, journal, pubDate, pmid, doi, doiPmid };
   const label = buildNbibLabel(fields);
   return { fields, label };
 }
@@ -521,6 +546,7 @@ function applyNbibToForm() {
 
   // Fill bibliographic fields only (normalize again just in case)
   cur.paperTitle = normalizeInlineText(fields.title) || cur.paperTitle;
+  cur.authors = normalizeInlineText(fields.authors) || cur.authors;
   cur.firstAuthor = normalizeInlineText(fields.firstAuthor) || cur.firstAuthor;
   cur.lastAuthor = normalizeInlineText(fields.lastAuthor) || cur.lastAuthor;
   cur.journal = normalizeInlineText(fields.journal) || cur.journal;
@@ -538,10 +564,12 @@ function applyNbibToForm() {
   }
 
   // Suggest fileBase only if empty
-  if (!cur.fileBase) {
+  /*if (!cur.fileBase) {
     const sug = suggestFileBaseFromFields(fields);
     if (sug) cur.fileBase = sug;
   }
+  自動取得のコードを削除
+  */
 
   setFormData(cur);
   saveDraft();
