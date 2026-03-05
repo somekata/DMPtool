@@ -4,6 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DMP Summary</title>
+
+    <!-- Marked (Markdown -> HTML). GitHub Pagesなら普通に読めます -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+    ></script>
+
     <style>
       :root {
         --bg: #f6f8ff;
@@ -12,11 +19,13 @@
         --muted: #5b6b7b;
         --line: #e6ecff;
         --accent: #2f6bff;
-        --accent2: #00b894;
-        --warn: #ffb020;
         --shadow: 0 10px 30px rgba(23, 42, 88, 0.1);
         --radius: 16px;
+        --mono:
+          ui-monospace, SFMono-Regular, Menlo, Consolas,
+          "Noto Sans Mono CJK JP", monospace;
       }
+
       * {
         box-sizing: border-box;
       }
@@ -43,22 +52,26 @@
           var(--bg);
         color: var(--ink);
       }
+
       header {
-        padding: 20px 18px 10px;
-        max-width: 1200px;
+        padding: 18px 18px 10px;
+        max-width: 1280px;
         margin: 0 auto;
       }
+
       .title {
         display: flex;
         gap: 12px;
         align-items: flex-end;
         flex-wrap: wrap;
       }
+
       h1 {
         margin: 0;
         font-size: 22px;
         letter-spacing: 0.3px;
       }
+
       .sub {
         color: var(--muted);
         font-size: 13px;
@@ -66,16 +79,21 @@
       }
 
       .wrap {
-        max-width: 1200px;
+        max-width: 1280px;
         margin: 0 auto;
         padding: 10px 18px 26px;
         display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 14px;
+        grid-template-columns: 3fr 10px 5fr; /* 左:バー:右 */
+        gap: 0;
+        align-items: stretch;
       }
+
       @media (max-width: 980px) {
         .wrap {
           grid-template-columns: 1fr;
+        }
+        .splitter {
+          display: none;
         }
       }
 
@@ -85,7 +103,11 @@
         border-radius: var(--radius);
         box-shadow: var(--shadow);
         overflow: hidden;
+        min-height: 70vh;
+        display: flex;
+        flex-direction: column;
       }
+
       .card-h {
         padding: 14px 14px 12px;
         border-bottom: 1px solid var(--line);
@@ -95,12 +117,14 @@
         gap: 10px;
         flex-wrap: wrap;
       }
+
       .controls {
         display: flex;
         gap: 10px;
         align-items: center;
         flex-wrap: wrap;
       }
+
       .btn {
         appearance: none;
         border: 1px solid var(--line);
@@ -111,15 +135,23 @@
         font-weight: 700;
         color: var(--ink);
         box-shadow: 0 6px 16px rgba(23, 42, 88, 0.08);
+        user-select: none;
       }
       .btn.primary {
         border-color: rgba(47, 107, 255, 0.25);
         background: linear-gradient(180deg, #eaf1ff 0%, #f7fbff 100%);
         color: #0f2c92;
       }
+      .btn.small {
+        padding: 8px 10px;
+        font-size: 12px;
+        border-radius: 10px;
+        box-shadow: none;
+      }
       .btn:active {
         transform: translateY(1px);
       }
+
       input[type="file"] {
         border: 1px dashed rgba(47, 107, 255, 0.35);
         padding: 10px 12px;
@@ -127,6 +159,7 @@
         background: #fbfcff;
         width: min(520px, 100%);
       }
+
       .search {
         display: flex;
         gap: 10px;
@@ -141,6 +174,7 @@
         outline: none;
         background: #fbfcff;
       }
+
       .pill {
         font-size: 12px;
         padding: 6px 10px;
@@ -150,17 +184,34 @@
         background: #fbfcff;
         white-space: nowrap;
       }
-      .pill.ok {
-        border-color: rgba(0, 184, 148, 0.25);
-        color: #0e6b57;
-        background: #eafff7;
+
+      /* splitter */
+      .splitter {
+        width: 10px;
+        cursor: col-resize;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      .pill.warn {
-        border-color: rgba(255, 176, 32, 0.35);
-        color: #8a5a00;
-        background: #fff7e6;
+      .splitter::before {
+        content: "";
+        width: 4px;
+        height: 65vh;
+        border-radius: 999px;
+        background: linear-gradient(
+          180deg,
+          rgba(47, 107, 255, 0.18),
+          rgba(47, 107, 255, 0.04)
+        );
+        border: 1px solid rgba(47, 107, 255, 0.14);
       }
 
+      /* table */
+      .tableWrap {
+        flex: 1;
+        overflow: auto;
+        max-height: 64vh;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
@@ -202,13 +253,8 @@
           transparent 70%
         );
       }
-      .muted {
-        color: var(--muted);
-      }
       .mono {
-        font-family:
-          ui-monospace, SFMono-Regular, Menlo, Consolas,
-          "Noto Sans Mono CJK JP", monospace;
+        font-family: var(--mono);
       }
       .empty {
         padding: 18px 14px;
@@ -218,23 +264,30 @@
       /* details */
       .detail {
         padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+        overflow: hidden;
       }
+
       .meta {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
-        margin-bottom: 12px;
       }
       @media (max-width: 980px) {
         .meta {
           grid-template-columns: 1fr;
         }
       }
+
       .kv {
         border: 1px solid var(--line);
         border-radius: 12px;
         padding: 10px 12px;
         background: #fbfcff;
+        min-height: 56px;
       }
       .kv .k {
         font-size: 11px;
@@ -243,53 +296,113 @@
       }
       .kv .v {
         font-size: 13px;
-        font-weight: 700;
+        font-weight: 800;
         color: #1b2a40;
         word-break: break-word;
       }
-      .divider {
-        height: 1px;
-        background: var(--line);
-        margin: 12px 0;
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
       }
-      .md {
+      .tabBtns {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .tab {
+        padding: 8px 10px;
+        border-radius: 999px;
         border: 1px solid var(--line);
-        border-radius: 12px;
-        padding: 12px 12px;
-        background: #ffffff;
-        overflow: auto;
-        max-height: 56vh;
-      }
-      .md h1,
-      .md h2,
-      .md h3 {
-        margin: 10px 0 6px;
-      }
-      .md h1 {
-        font-size: 18px;
-      }
-      .md h2 {
-        font-size: 16px;
-      }
-      .md h3 {
-        font-size: 14px;
-      }
-      .md p {
-        margin: 8px 0;
-        line-height: 1.6;
-      }
-      .md ul,
-      .md ol {
-        margin: 8px 0 8px 20px;
-      }
-      .md code {
-        background: #f3f5ff;
-        border: 1px solid #e7ebff;
-        padding: 0 5px;
-        border-radius: 6px;
+        background: #fbfcff;
+        color: #243249;
+        font-weight: 800;
+        cursor: pointer;
+        user-select: none;
         font-size: 12px;
       }
-      .md pre {
+      .tab.active {
+        border-color: rgba(47, 107, 255, 0.3);
+        background: #eaf1ff;
+        color: #0f2c92;
+      }
+
+      .contentBox {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #ffffff;
+        overflow: auto;
+        padding: 14px 14px;
+        flex: 1;
+        min-height: 40vh;
+      }
+
+      /* rendered html */
+      .rendered {
+        max-width: 100%;
+        line-height: 1.75;
+        font-size: 14px;
+      }
+      .rendered h1 {
+        font-size: 20px;
+        margin: 12px 0 8px;
+      }
+      .rendered h2 {
+        font-size: 18px;
+        margin: 14px 0 8px;
+      }
+      .rendered h3 {
+        font-size: 16px;
+        margin: 12px 0 6px;
+      }
+      .rendered p {
+        margin: 10px 0;
+      }
+      .rendered ul,
+      .rendered ol {
+        margin: 10px 0 10px 22px;
+      }
+      .rendered li {
+        margin: 6px 0;
+      }
+      .rendered hr {
+        border: 0;
+        border-top: 1px solid var(--line);
+        margin: 14px 0;
+      }
+      .rendered blockquote {
+        margin: 10px 0;
+        padding: 10px 12px;
+        border-left: 4px solid rgba(47, 107, 255, 0.25);
+        background: #f7f9ff;
+        border-radius: 10px;
+        color: #2b3a55;
+      }
+      .rendered table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 13px;
+      }
+      .rendered th,
+      .rendered td {
+        border: 1px solid var(--line);
+        padding: 8px 10px;
+        vertical-align: top;
+      }
+      .rendered code {
+        font-family: var(--mono);
+        background: #f3f5ff;
+        border: 1px solid #e7ebff;
+        padding: 0 6px;
+        border-radius: 7px;
+        font-size: 12px;
+      }
+      .rendered pre {
         background: #0f172a;
         color: #e6edf7;
         padding: 12px;
@@ -297,12 +410,26 @@
         overflow: auto;
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
-      .md pre code {
+      .rendered pre code {
         background: transparent;
         border: none;
         padding: 0;
         color: inherit;
         font-size: 12px;
+      }
+
+      /* raw */
+      pre.raw {
+        margin: 0;
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1.6;
+        white-space: pre-wrap; /* 標準で折り返し */
+        word-break: break-word;
+      }
+      pre.raw.nowrap {
+        white-space: pre; /* 折り返しOFF */
+        word-break: normal;
       }
 
       .foot {
@@ -315,12 +442,6 @@
         gap: 10px;
         flex-wrap: wrap;
       }
-      a.fake {
-        color: var(--accent);
-        text-decoration: none;
-        font-weight: 700;
-        cursor: pointer;
-      }
     </style>
   </head>
 
@@ -329,15 +450,15 @@
       <div class="title">
         <h1>DMP Summary</h1>
         <div class="sub">
-          複数の .md をアップロード → Apply →
-          一覧＋クリックで詳細（検索・ソート対応）
+          複数の .md をアップロード → Apply → 一覧（検索・ソート）→
+          クリックで詳細（HTML/RAW）
         </div>
       </div>
     </header>
 
-    <div class="wrap">
-      <!-- LEFT: List -->
-      <section class="card">
+    <div class="wrap" id="wrap">
+      <!-- LEFT -->
+      <section class="card" id="leftCard">
         <div class="card-h">
           <div class="controls">
             <input
@@ -349,7 +470,6 @@
             <button id="applyBtn" class="btn primary">Apply</button>
             <button id="clearBtn" class="btn">Clear</button>
           </div>
-
           <div class="controls search">
             <input
               id="q"
@@ -360,7 +480,7 @@
           </div>
         </div>
 
-        <div style="max-height: 62vh; overflow: auto">
+        <div class="tableWrap">
           <table>
             <thead>
               <tr>
@@ -389,20 +509,16 @@
         </div>
 
         <div class="foot">
-          <div>
-            <span class="pill ok">初期ソート：ファイル名</span>
-            <span class="pill">列ヘッダクリックで昇順/降順</span>
-          </div>
-          <div>
-            <span class="pill warn"
-              >YAMLなしの古いmdは作成者/作成日が「—」になることがあります</span
-            >
-          </div>
+          <div class="pill">列ヘッダクリックで昇順/降順</div>
+          <div class="pill">分割バーで幅調整できます</div>
         </div>
       </section>
 
-      <!-- RIGHT: Detail -->
-      <section class="card">
+      <!-- SPLITTER -->
+      <div class="splitter" id="splitter" title="ドラッグで幅を調整"></div>
+
+      <!-- RIGHT -->
+      <section class="card" id="rightCard">
         <div class="card-h">
           <div
             style="
@@ -415,15 +531,9 @@
             <strong>詳細</strong>
             <span id="selectedPill" class="pill">未選択</span>
           </div>
-          <div
-            style="
-              display: flex;
-              gap: 10px;
-              align-items: center;
-              flex-wrap: wrap;
-            "
-          >
-            <span class="pill">クリックで内容表示</span>
+          <div class="controls">
+            <button id="copyRawBtn" class="btn small">RAWをコピー</button>
+            <button id="copyHtmlBtn" class="btn small">HTMLをコピー</button>
           </div>
         </div>
 
@@ -431,41 +541,38 @@
           <div class="meta" id="metaGrid">
             <div class="kv">
               <div class="k">ファイル名</div>
-              <div class="v muted">—</div>
+              <div class="v" id="m_fileName">—</div>
             </div>
             <div class="kv">
               <div class="k">作成者（createdBy）</div>
-              <div class="v muted">—</div>
+              <div class="v" id="m_createdBy">—</div>
             </div>
             <div class="kv">
               <div class="k">作成日（createdAt）</div>
-              <div class="v muted">—</div>
+              <div class="v mono" id="m_createdAt">—</div>
             </div>
             <div class="kv">
               <div class="k">最終更新日（updatedAt）</div>
-              <div class="v muted">—</div>
+              <div class="v mono" id="m_updatedAt">—</div>
             </div>
           </div>
 
-          <div class="divider"></div>
-
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              gap: 10px;
-              flex-wrap: wrap;
-            "
-          >
-            <div class="muted" style="font-size: 12px">
-              本文（Markdown表示）
+          <div class="tabs">
+            <div class="tabBtns">
+              <div class="tab active" id="tabRendered">HTML（見やすく）</div>
+              <div class="tab" id="tabRaw">RAW</div>
             </div>
-            <div>
-              <a class="fake" id="toggleRaw">RAW表示に切替</a>
+            <div class="tabBtns">
+              <button id="wrapToggleBtn" class="btn small">
+                RAW折り返し：ON
+              </button>
             </div>
           </div>
-          <div class="md" id="mdView"></div>
+
+          <div class="contentBox" id="contentBox">
+            <div class="rendered" id="renderedView"></div>
+            <pre class="raw" id="rawView" style="display: none"></pre>
+          </div>
         </div>
       </section>
     </div>
@@ -484,9 +591,8 @@
       }
 
       function isIsoDate(s) {
-        return typeof s === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(s.trim());
+        return typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.trim());
       }
-
       function dateToNumber(s) {
         if (!isIsoDate(s)) return NaN;
         return Number(s.replaceAll("-", ""));
@@ -495,12 +601,9 @@
       // ---------- YAML front-matter parser (robust) ----------
       function parseFrontMatter(mdText) {
         let text = String(mdText ?? "");
-
-        // 先頭BOM除去 + 先頭の空白/改行を少しだけ許容
         text = text.replace(/^\uFEFF/, ""); // BOM
         text = text.replace(/^\s+/, ""); // leading whitespace/newlines
 
-        // front-matter: --- \n ... \n ---
         const m = text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(\r?\n|$)/);
         if (!m) return { fm: null, body: text };
 
@@ -512,7 +615,6 @@
 
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
-
           if (!line.trim()) continue;
 
           const mm = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
@@ -521,26 +623,22 @@
           const key = mm[1];
           let val = mm[2] ?? "";
 
-          // block scalar: key: |
           if (val.trim() === "|") {
             const buf = [];
             i++;
             while (i < lines.length) {
               const L = lines[i];
-
-              // 次のkeyっぽい行に来たら終了（ただしインデント行は続き）
               if (/^[A-Za-z0-9_]+:\s*/.test(L) && !/^\s+/.test(L)) {
                 i--;
                 break;
               }
-              buf.push(L.replace(/^\s{2}/, "")); // 先頭2スペースだけ落とす
+              buf.push(L.replace(/^\s{2}/, ""));
               i++;
             }
             fm[key] = buf.join("\n");
             continue;
           }
 
-          // クォート除去
           val = val.trim();
           if (
             (val.startsWith('"') && val.endsWith('"')) ||
@@ -553,129 +651,40 @@
 
         return { fm, body };
       }
-      // ---------- fallback updatedAt from body ----------
+
       function findUpdatedAtFromBody(body) {
         const m = String(body ?? "").match(
-          /最終更新\\s*[:：]\\s*(\\d{4}-\\d{2}-\\d{2})/,
+          /最終更新\s*[:：]\s*(\d{4}-\d{2}-\d{2})/,
         );
         return m ? m[1] : "";
       }
 
-      // ---------- tiny markdown renderer (enough for notes) ----------
-      function renderMarkdown(md) {
-        const src = String(md ?? "");
-        // fenced code blocks
-        const parts = src.split(/```/);
-        let html = "";
-        for (let i = 0; i < parts.length; i++) {
-          if (i % 2 === 1) {
-            // code block
-            const code = parts[i].replace(/^\\w*\\n/, ""); // drop language line if any
-            html += "<pre><code>" + escapeHtml(code) + "</code></pre>";
-          } else {
-            html += renderMarkdownNoFence(parts[i]);
-          }
+      // ---------- markdown -> html ----------
+      function mdToHtml(md) {
+        // markedが読めるならそれを使う
+        if (window.marked && typeof window.marked.parse === "function") {
+          // GitHub風に近づける軽いオプション
+          return window.marked.parse(md, { breaks: true, gfm: true });
         }
-        return html;
-      }
-
-      function inlineFormat(s) {
-        let x = escapeHtml(s);
-        // inline code
-        x = x.replace(/`([^`]+)`/g, "<code>$1</code>");
-        // bold
-        x = x.replace(/\\*\\*([^*]+)\\*\\*/g, "<strong>$1</strong>");
-        return x;
-      }
-
-      function renderMarkdownNoFence(chunk) {
-        const lines = String(chunk ?? "").split(/\\r?\\n/);
-        let out = "";
-        let inUl = false;
-        let inOl = false;
-
-        function closeLists() {
-          if (inUl) {
-            out += "</ul>";
-            inUl = false;
-          }
-          if (inOl) {
-            out += "</ol>";
-            inOl = false;
-          }
-        }
-
-        for (const line of lines) {
-          const t = line.trim();
-
-          if (!t) {
-            closeLists();
-            continue;
-          }
-
-          // headings
-          if (/^###\\s+/.test(t)) {
-            closeLists();
-            out += "<h3>" + inlineFormat(t.replace(/^###\\s+/, "")) + "</h3>";
-            continue;
-          }
-          if (/^##\\s+/.test(t)) {
-            closeLists();
-            out += "<h2>" + inlineFormat(t.replace(/^##\\s+/, "")) + "</h2>";
-            continue;
-          }
-          if (/^#\\s+/.test(t)) {
-            closeLists();
-            out += "<h1>" + inlineFormat(t.replace(/^#\\s+/, "")) + "</h1>";
-            continue;
-          }
-
-          // unordered list
-          if (/^[-*]\\s+/.test(t)) {
-            if (inOl) {
-              out += "</ol>";
-              inOl = false;
-            }
-            if (!inUl) {
-              out += "<ul>";
-              inUl = true;
-            }
-            out += "<li>" + inlineFormat(t.replace(/^[-*]\\s+/, "")) + "</li>";
-            continue;
-          }
-
-          // ordered list
-          if (/^\\d+\\.\\s+/.test(t)) {
-            if (inUl) {
-              out += "</ul>";
-              inUl = false;
-            }
-            if (!inOl) {
-              out += "<ol>";
-              inOl = true;
-            }
-            out +=
-              "<li>" + inlineFormat(t.replace(/^\\d+\\.\\s+/, "")) + "</li>";
-            continue;
-          }
-
-          // paragraph
-          closeLists();
-          out += "<p>" + inlineFormat(t) + "</p>";
-        }
-        closeLists();
-        return out;
+        // フォールバック：最低限
+        const safe = escapeHtml(md)
+          .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
+          .replace(/^##\s+(.+)$/gm, "<h2>$1</h2>")
+          .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>")
+          .replace(/\n{2,}/g, "</p><p>")
+          .replace(/\n/g, "<br>");
+        return "<p>" + safe + "</p>";
       }
 
       // ---------- state ----------
-      let entries = []; // all parsed entries
-      let filtered = []; // filtered+sorted
+      let entries = [];
+      let filtered = [];
       let sortKey = "fileName";
-      let sortDir = "asc"; // asc|desc
+      let sortDir = "asc";
       let selectedIndex = -1;
-      let showRaw = false;
+      let rawWrap = true;
 
-      // ---------- core ----------
+      // ---------- file read ----------
       async function readFiles(fileList) {
         const files = Array.from(fileList || []);
         const reads = files.map(
@@ -700,7 +709,6 @@
         const updatedAt =
           fm?.updatedAt || fm?.updated_at || findUpdatedAtFromBody(body) || "";
 
-        // 検索用テキスト（本文も含める）
         const hay = [
           fileName,
           createdBy,
@@ -712,7 +720,7 @@
           fm?.journal || "",
           body,
         ]
-          .join("\\n")
+          .join("\n")
           .toLowerCase();
 
         return {
@@ -727,79 +735,19 @@
         };
       }
 
-      function applyFilterSort() {
-        const q = $("q").value.trim().toLowerCase();
-        let arr = entries.slice();
-
-        if (q) {
-          arr = arr.filter((e) => e.hay.includes(q));
-        }
-
-        arr.sort((a, b) => compareByKey(a, b, sortKey, sortDir));
-        filtered = arr;
-        renderTable();
-        updateCount();
-        // selection reset if out of range
-        if (selectedIndex >= filtered.length) {
-          selectedIndex = -1;
-          renderDetail(null);
-        }
-      }
-
       function compareByKey(a, b, key, dir) {
         const mul = dir === "asc" ? 1 : -1;
         const av = a[key] ?? "";
         const bv = b[key] ?? "";
 
-        // date columns
         if (key === "createdAt" || key === "updatedAt") {
           const an = dateToNumber(av);
           const bn = dateToNumber(bv);
           if (!Number.isNaN(an) && !Number.isNaN(bn)) return (an - bn) * mul;
-          // missing dates go bottom
           if (Number.isNaN(an) && !Number.isNaN(bn)) return 1 * mul;
           if (!Number.isNaN(an) && Number.isNaN(bn)) return -1 * mul;
         }
-
-        // string
         return String(av).localeCompare(String(bv), "ja") * mul;
-      }
-
-      function renderTable() {
-        const tb = $("tbody");
-        if (!filtered.length) {
-          tb.innerHTML = `<tr><td colspan="4" class="empty">該当なし（検索条件を見直してください）</td></tr>`;
-          clearSortIcons();
-          setSortIcon();
-          return;
-        }
-
-        tb.innerHTML = filtered
-          .map((e, idx) => {
-            const active = idx === selectedIndex ? "active" : "";
-            return `
-          <tr class="${active}" data-idx="${idx}">
-            <td class="mono">${escapeHtml(e.fileName)}</td>
-            <td>${escapeHtml(e.createdBy)}</td>
-            <td class="mono">${escapeHtml(e.createdAt)}</td>
-            <td class="mono">${escapeHtml(e.updatedAt)}</td>
-          </tr>
-        `;
-          })
-          .join("");
-
-        // row click
-        tb.querySelectorAll("tr[data-idx]").forEach((tr) => {
-          tr.addEventListener("click", () => {
-            selectedIndex = Number(tr.dataset.idx);
-            const entry = filtered[selectedIndex];
-            renderTable(); // highlight
-            renderDetail(entry);
-          });
-        });
-
-        clearSortIcons();
-        setSortIcon();
       }
 
       function clearSortIcons() {
@@ -819,38 +767,104 @@
         $("countPill").textContent = `${shown}/${total} files`;
       }
 
-      function renderDetail(entry) {
-        const pill = $("selectedPill");
-        const metaGrid = $("metaGrid");
-        const mdView = $("mdView");
-
-        if (!entry) {
-          pill.textContent = "未選択";
-          metaGrid.innerHTML = `
-          <div class="kv"><div class="k">ファイル名</div><div class="v muted">—</div></div>
-          <div class="kv"><div class="k">作成者（createdBy）</div><div class="v muted">—</div></div>
-          <div class="kv"><div class="k">作成日（createdAt）</div><div class="v muted">—</div></div>
-          <div class="kv"><div class="k">最終更新日（updatedAt）</div><div class="v muted">—</div></div>
-        `;
-          mdView.innerHTML = "";
+      function renderTable() {
+        const tb = $("tbody");
+        if (!filtered.length) {
+          tb.innerHTML = `<tr><td colspan="4" class="empty">該当なし（検索条件を見直してください）</td></tr>`;
+          clearSortIcons();
+          setSortIcon();
           return;
         }
 
-        pill.textContent = entry.fileName;
-
-        metaGrid.innerHTML = `
-        <div class="kv"><div class="k">ファイル名</div><div class="v mono">${escapeHtml(entry.fileName)}</div></div>
-        <div class="kv"><div class="k">作成者（createdBy）</div><div class="v">${escapeHtml(entry.createdBy)}</div></div>
-        <div class="kv"><div class="k">作成日（createdAt）</div><div class="v mono">${escapeHtml(entry.createdAt)}</div></div>
-        <div class="kv"><div class="k">最終更新日（updatedAt）</div><div class="v mono">${escapeHtml(entry.updatedAt)}</div></div>
+        tb.innerHTML = filtered
+          .map((e, idx) => {
+            const active = idx === selectedIndex ? "active" : "";
+            return `
+        <tr class="${active}" data-idx="${idx}">
+          <td class="mono">${escapeHtml(e.fileName)}</td>
+          <td>${escapeHtml(e.createdBy)}</td>
+          <td class="mono">${escapeHtml(e.createdAt)}</td>
+          <td class="mono">${escapeHtml(e.updatedAt)}</td>
+        </tr>
       `;
+          })
+          .join("");
 
-        if (showRaw) {
-          mdView.innerHTML = `<pre><code>${escapeHtml(entry.raw)}</code></pre>`;
-        } else {
-          // body only (remove YAML)
-          mdView.innerHTML = renderMarkdown(entry.body);
+        tb.querySelectorAll("tr[data-idx]").forEach((tr) => {
+          tr.addEventListener("click", () => {
+            selectedIndex = Number(tr.dataset.idx);
+            renderTable();
+            renderDetail(filtered[selectedIndex]);
+          });
+        });
+
+        clearSortIcons();
+        setSortIcon();
+      }
+
+      function applyFilterSort() {
+        const q = $("q").value.trim().toLowerCase();
+        let arr = entries.slice();
+        if (q) arr = arr.filter((e) => e.hay.includes(q));
+        arr.sort((a, b) => compareByKey(a, b, sortKey, sortDir));
+        filtered = arr;
+        renderTable();
+        updateCount();
+
+        if (selectedIndex >= filtered.length) {
+          selectedIndex = -1;
+          renderDetail(null);
         }
+      }
+
+      // ---------- detail ----------
+      function setTab(mode) {
+        const rendered = $("renderedView");
+        const raw = $("rawView");
+        const tabR = $("tabRendered");
+        const tabRaw = $("tabRaw");
+
+        if (mode === "raw") {
+          rendered.style.display = "none";
+          raw.style.display = "block";
+          tabR.classList.remove("active");
+          tabRaw.classList.add("active");
+          $("wrapToggleBtn").style.display = "inline-block";
+        } else {
+          rendered.style.display = "block";
+          raw.style.display = "none";
+          tabRaw.classList.remove("active");
+          tabR.classList.add("active");
+          $("wrapToggleBtn").style.display = "none";
+        }
+      }
+
+      function renderDetail(entry) {
+        if (!entry) {
+          $("selectedPill").textContent = "未選択";
+          $("m_fileName").textContent = "—";
+          $("m_createdBy").textContent = "—";
+          $("m_createdAt").textContent = "—";
+          $("m_updatedAt").textContent = "—";
+          $("renderedView").innerHTML = "";
+          $("rawView").textContent = "";
+          setTab("rendered");
+          return;
+        }
+
+        $("selectedPill").textContent = entry.fileName;
+        $("m_fileName").textContent = entry.fileName;
+        $("m_createdBy").textContent = entry.createdBy;
+        $("m_createdAt").textContent = entry.createdAt;
+        $("m_updatedAt").textContent = entry.updatedAt;
+
+        // HTML view: body only
+        $("renderedView").innerHTML = mdToHtml(entry.body);
+        // RAW view: whole
+        $("rawView").textContent = entry.raw;
+
+        // default tab
+        setTab("rendered");
       }
 
       // ---------- events ----------
@@ -863,12 +877,9 @@
         try {
           const items = await readFiles(files);
           entries = items.map((x) => buildEntry(x.file, x.text));
-
-          // 初期：ファイル名でソート
           sortKey = "fileName";
           sortDir = "asc";
           selectedIndex = -1;
-
           applyFilterSort();
           renderDetail(null);
         } catch (err) {
@@ -889,17 +900,13 @@
         renderDetail(null);
       });
 
-      $("q").addEventListener("input", () => {
-        applyFilterSort();
-      });
+      $("q").addEventListener("input", applyFilterSort);
 
-      // header sort
       document.querySelectorAll("thead th[data-key]").forEach((th) => {
         th.addEventListener("click", () => {
           const key = th.dataset.key;
-          if (key === sortKey) {
-            sortDir = sortDir === "asc" ? "desc" : "asc";
-          } else {
+          if (key === sortKey) sortDir = sortDir === "asc" ? "desc" : "asc";
+          else {
             sortKey = key;
             sortDir = "asc";
           }
@@ -907,14 +914,71 @@
         });
       });
 
-      $("toggleRaw").addEventListener("click", () => {
-        showRaw = !showRaw;
-        $("toggleRaw").textContent = showRaw
-          ? "Markdown表示に切替"
-          : "RAW表示に切替";
-        const entry = selectedIndex >= 0 ? filtered[selectedIndex] : null;
-        renderDetail(entry);
+      $("tabRendered").addEventListener("click", () => setTab("rendered"));
+      $("tabRaw").addEventListener("click", () => setTab("raw"));
+
+      $("wrapToggleBtn").addEventListener("click", () => {
+        rawWrap = !rawWrap;
+        $("wrapToggleBtn").textContent = rawWrap
+          ? "RAW折り返し：ON"
+          : "RAW折り返し：OFF";
+        const raw = $("rawView");
+        raw.classList.toggle("nowrap", !rawWrap);
       });
+
+      $("copyRawBtn").addEventListener("click", async () => {
+        const t = $("rawView").textContent || "";
+        if (!t) {
+          alert("RAWがありません（行を選択してください）");
+          return;
+        }
+        await navigator.clipboard.writeText(t);
+      });
+
+      $("copyHtmlBtn").addEventListener("click", async () => {
+        const html = $("renderedView").innerHTML || "";
+        if (!html) {
+          alert("HTMLがありません（行を選択してください）");
+          return;
+        }
+        await navigator.clipboard.writeText(html);
+      });
+
+      // ---------- splitter drag ----------
+      (function setupSplitter() {
+        const wrap = $("wrap");
+        const splitter = $("splitter");
+        if (!wrap || !splitter) return;
+
+        let dragging = false;
+
+        splitter.addEventListener("mousedown", (e) => {
+          dragging = true;
+          document.body.style.userSelect = "none";
+          e.preventDefault();
+        });
+
+        window.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          const rect = wrap.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const minLeft = 260;
+          const minRight = 360;
+          const total = rect.width;
+
+          const left = Math.max(minLeft, Math.min(x, total - minRight));
+          const right = total - left - 10;
+
+          // grid-template-columns: left px | 10px | right px
+          wrap.style.gridTemplateColumns = `${left}px 10px ${right}px`;
+        });
+
+        window.addEventListener("mouseup", () => {
+          if (!dragging) return;
+          dragging = false;
+          document.body.style.userSelect = "";
+        });
+      })();
     </script>
   </body>
 </html>
