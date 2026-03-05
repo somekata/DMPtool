@@ -21,6 +21,8 @@ const FIELDS = [
   'correspondingAuthor',
   'journal',
   'pubDate',
+  'volumeIssue',
+  'so',
   'doiPmid',
   'project',
   'collab',
@@ -40,6 +42,11 @@ const el = (id) => document.getElementById(id);
 function normalizeInlineText(s) {
   // Replace any whitespace runs (including newlines) with single spaces
   return (s ?? '').toString().replace(/\s+/g, ' ').trim();
+}
+
+function normalizeVolIssuePages(s){
+  const t = (s || '').replace(/\s+/g,'').trim();
+  return t;
 }
 
 // ---------- UI helper ----------
@@ -64,6 +71,10 @@ function getFormData() {
     const node = el(k);
     data[k] = (node?.value ?? '').toString().trim();
   }
+
+  // 巻(号):ページの特殊正規化
+  data.volumeIssue = normalizeVolIssuePages(data.volumeIssue);
+
   return data;
 }
 
@@ -125,6 +136,8 @@ function buildMd(data) {
     `correspondingAuthor: "${escapeYaml(data.correspondingAuthor)}"`,
     `journal: "${escapeYaml(data.journal)}"`,
     `pubDate: "${escapeYaml(data.pubDate)}"`,
+    `volumeIssue: "${escapeYaml(data.volumeIssue)}"`,
+    `so: "${escapeYaml(data.so)}"`,
     `doiPmid: "${escapeYaml(data.doiPmid)}"`,
     `project: "${escapeYaml(data.project)}"`,
     `collab: "${escapeYaml(data.collab)}"`,
@@ -152,6 +165,8 @@ function buildMd(data) {
     `- 責任著者: ${safeDash(data.correspondingAuthor)}`,
     `- 雑誌名: ${safeDash(data.journal)}`,
     `- 公開日: ${safeDash(data.pubDate)}`,
+    `- 巻(号):ページ: ${safeDash(data.volumeIssue)}`,
+    `- ソース: ${safeDash(data.so)}`,
     `- DOI/PMID: ${safeDash(data.doiPmid)}`,
     `- 関連プロジェクト: ${safeDash(data.project)}`,
     `- 共同研究: ${safeDash(data.collab)}`,
@@ -298,6 +313,8 @@ async function loadMdFile() {
     correspondingAuthor: fm.correspondingAuthor ?? '',
     journal: fm.journal ?? '',
     pubDate: fm.pubDate ?? '',
+    volumeIssue: fm.volumeIssue ?? '',
+    so: fm.so ?? '',
     doiPmid: fm.doiPmid ?? '',
     project: fm.project ?? '',
     collab: fm.collab ?? '',
@@ -367,13 +384,30 @@ function parseNBIBRecord(raw) {
   const firstAuthor = normalizeInlineText(authors[0] || '');
   const lastAuthor = normalizeInlineText(authors[authors.length - 1] || '');
   const journal = normalizeInlineText(firstNonEmpty(map.TA) || firstNonEmpty(map.JT) || '');
+
   const dp = normalizeInlineText(firstNonEmpty(map.DP) || '');
   const pubDate = normalizeDP(dp);
+  const volume = normalizeInlineText(firstNonEmpty(map.VI) || '');
+  const issue = normalizeInlineText(firstNonEmpty(map.IP) || '');
+  const pages = normalizeInlineText(firstNonEmpty(map.PG) || '');
+
+  let volumeIssue = '';
+  if (volume) {
+    volumeIssue = volume;
+    if (issue) volumeIssue += `(${issue})`;
+    if (pages) volumeIssue += `:${pages}`;
+  } else if (pages) {
+    // 巻が無い特殊ケース
+    volumeIssue = pages;
+  }
+
+  const so = normalizeInlineText(firstNonEmpty(map.SO) || '');
+
   const pmid = normalizeInlineText(firstNonEmpty(map.PMID) || '');
   const doi = normalizeInlineText(extractDOI(map));
   const doiPmid = normalizeInlineText(joinDoiPmid(pmid, doi));
 
-  const fields = { title, authors: authorsStr, firstAuthor, lastAuthor, journal, pubDate, pmid, doi, doiPmid };
+  const fields = { title, authors: authorsStr, firstAuthor, lastAuthor, journal, pubDate, volumeIssue, so, pmid, doi, doiPmid };
   const label = buildNbibLabel(fields);
   return { fields, label };
 }
@@ -551,6 +585,8 @@ function applyNbibToForm() {
   cur.lastAuthor = normalizeInlineText(fields.lastAuthor) || cur.lastAuthor;
   cur.journal = normalizeInlineText(fields.journal) || cur.journal;
   cur.pubDate = normalizeInlineText(fields.pubDate) || cur.pubDate;
+  cur.volumeIssue = normalizeInlineText(fields.volumeIssue) || cur.volumeIssue;
+  cur.so = normalizeInlineText(fields.so) || cur.so;
 
   // doiPmid merge
   const incoming = normalizeInlineText(fields.doiPmid || '');

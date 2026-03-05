@@ -163,6 +163,14 @@
               <input id="journal" type="text" placeholder="例）JCM" />
             </div>
             <div class="field">
+              <label>巻(号):ページ</label>
+              <input
+                id="volumeIssue"
+                type="text"
+                placeholder="例）11(3):12-23"
+              />
+            </div>
+            <div class="field">
               <label>公開日（YYYY-MM-DD / YYYY-MM / YYYY）</label>
               <!-- NBIBは月までが多いので text に変更 -->
               <input
@@ -192,6 +200,20 @@
             </div>
           </div>
 
+          <div class="field">
+            <label
+              >ソース
+              <span class="hint"
+                >(雑誌名～doiまでの情報源を入力しますが、自動入力されない場合は省略可能です)</span
+              ></label
+            >
+            <input
+              id="so"
+              type="text"
+              placeholder="例）mBio. 2026 Feb 11;17(2):e0236625. doi: 10.1128/mbio.02366-25. Epub 2025 Dec 29."
+            />
+          </div>
+          <hr />
           <div class="field">
             <label>論文フォルダ（このmdの置き場）</label>
             <input
