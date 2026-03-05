@@ -13,6 +13,8 @@ const LS_KEY = 'paper_md_builder_draft_v1';
 
 const FIELDS = [
   'fileBase',
+  'createdBy',
+  'createdAt',
   'paperTitle',
   'paperShort',
   'authors',
@@ -128,6 +130,8 @@ function buildMd(data) {
     'tool: paper-md-builder',
     'version: 1.001',
     `fileBase: "${escapeYaml(data.fileBase)}"`,
+    `createdBy: "${escapeYaml(data.createdBy)}"`,
+    `createdAt: "${escapeYaml(data.createdAt)}"`,
     `paperTitle: "${escapeYaml(data.paperTitle)}"`,
     `paperShort: "${escapeYaml(data.paperShort)}"`,
     `authors: "${escapeYaml(data.authors)}"`,
@@ -318,6 +322,8 @@ async function loadMdFile() {
 
   const data = {
     fileBase: fm.fileBase ?? '',
+    createdBy: fm.createdBy ?? '',
+    createdAt: fm.createdAt ?? '',
     paperTitle: fm.paperTitle ?? '',
     paperShort: fm.paperShort ?? '',
     authors: fm.authors ?? '',
@@ -342,6 +348,20 @@ async function loadMdFile() {
   };
 
   setFormData(data);
+  
+    // ===== createdAt をロック（監査のため）=====
+  const createdAtEl = el('createdAt');
+  if (createdAtEl) {
+    if (fm.createdAt && String(fm.createdAt).trim()) {
+      createdAtEl.value = String(fm.createdAt).trim();
+      createdAtEl.disabled = true; // 🔒 YAMLにあるなら編集不可
+      createdAtEl.title = '作成日は変更できません（mdのYAMLに固定）';
+    } else {
+      createdAtEl.disabled = false; // 旧形式などは編集可
+      createdAtEl.title = '';
+    }
+  }
+
   saveDraft();
   updateDownloadButtonVisibility();
   updatePreview();
