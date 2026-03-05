@@ -260,6 +260,18 @@ function parseYamlFrontMatter(mdText) {
   while (i < lines.length) {
     const line = lines[i];
 
+    const nbMatch = line.match(/^notebookRef:\s*\|\s*$/);
+    if (nbMatch) {
+      i++;
+      const nbLines = [];
+      while (i < lines.length && (lines[i].startsWith('  ') || lines[i] === '')) {
+        nbLines.push(lines[i].startsWith('  ') ? lines[i].slice(2) : lines[i]);
+        i++;
+      }
+      obj.notebookRef = nbLines.join('\n').replace(/\n+$/, '');
+      continue;
+    }
+
     const notesMatch = line.match(/^notes:\s*\|\s*$/);
     if (notesMatch) {
       i++;
