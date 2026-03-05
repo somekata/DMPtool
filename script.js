@@ -15,6 +15,7 @@ const FIELDS = [
   'fileBase',
   'createdBy',
   'createdAt',
+  'updatedAt',
   'paperTitle',
   'paperShort',
   'authors',
@@ -49,6 +50,11 @@ function normalizeInlineText(s) {
 function normalizeVolIssuePages(s){
   const t = (s || '').replace(/\s+/g,'').trim();
   return t;
+}
+
+// ---------- Date helper ----------
+function today() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 // ---------- UI helper ----------
@@ -132,6 +138,7 @@ function buildMd(data) {
     `fileBase: "${escapeYaml(data.fileBase)}"`,
     `createdBy: "${escapeYaml(data.createdBy)}"`,
     `createdAt: "${escapeYaml(data.createdAt)}"`,
+    `updatedAt: "${escapeYaml(updated)}"`,
     `paperTitle: "${escapeYaml(data.paperTitle)}"`,
     `paperShort: "${escapeYaml(data.paperShort)}"`,
     `authors: "${escapeYaml(data.authors)}"`,
@@ -324,6 +331,7 @@ async function loadMdFile() {
     fileBase: fm.fileBase ?? '',
     createdBy: fm.createdBy ?? '',
     createdAt: fm.createdAt ?? '',
+    updatedAt: fm.updatedAt ?? '',
     paperTitle: fm.paperTitle ?? '',
     paperShort: fm.paperShort ?? '',
     authors: fm.authors ?? '',

@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DMP Summary</title>
+    <style>
+      :root {
+        --bg: #f6f8ff;
+        --panel: #ffffff;
+        --ink: #15202b;
+        --muted: #5b6b7b;
+        --line: #e6ecff;
+        --accent: #2f6bff;
+        --accent2: #00b894;
+        --warn: #ffb020;
+        --shadow: 0 10px 30px rgba(23, 42, 88, 0.1);
+        --radius: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          "Hiragino Kaku Gothic ProN",
+          "Noto Sans JP",
+          "Yu Gothic",
+          "Meiryo",
+          sans-serif;
+        background:
+          radial-gradient(
+            1200px 700px at 20% -10%,
+            #dfe9ff 0%,
+            transparent 60%
+          ),
+          radial-gradient(900px 600px at 90% 0%, #dff9ff 0%, transparent 55%),
+          var(--bg);
+        color: var(--ink);
+      }
+      header {
+        padding: 20px 18px 10px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .title {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+      }
+      h1 {
+        margin: 0;
+        font-size: 22px;
+        letter-spacing: 0.3px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 10px 18px 26px;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 14px;
+      }
+      @media (max-width: 980px) {
+        .wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .card-h {
+        padding: 14px 14px 12px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .btn {
+        appearance: none;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+        padding: 10px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        color: var(--ink);
+        box-shadow: 0 6px 16px rgba(23, 42, 88, 0.08);
+      }
+      .btn.primary {
+        border-color: rgba(47, 107, 255, 0.25);
+        background: linear-gradient(180deg, #eaf1ff 0%, #f7fbff 100%);
+        color: #0f2c92;
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      input[type="file"] {
+        border: 1px dashed rgba(47, 107, 255, 0.35);
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: #fbfcff;
+        width: min(520px, 100%);
+      }
+      .search {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        width: min(520px, 100%);
+      }
+      .search input {
+        width: 100%;
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        border-radius: 12px;
+        outline: none;
+        background: #fbfcff;
+      }
+      .pill {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        background: #fbfcff;
+        white-space: nowrap;
+      }
+      .pill.ok {
+        border-color: rgba(0, 184, 148, 0.25);
+        color: #0e6b57;
+        background: #eafff7;
+      }
+      .pill.warn {
+        border-color: rgba(255, 176, 32, 0.35);
+        color: #8a5a00;
+        background: #fff7e6;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      thead th {
+        text-align: left;
+        padding: 12px 14px;
+        color: #22324a;
+        background: #f7f9ff;
+        border-bottom: 1px solid var(--line);
+        user-select: none;
+        cursor: pointer;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      thead th .sort {
+        font-size: 11px;
+        color: var(--muted);
+        margin-left: 6px;
+      }
+      tbody td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        color: #243249;
+        vertical-align: top;
+      }
+      tbody tr {
+        cursor: pointer;
+      }
+      tbody tr:hover {
+        background: #f3f7ff;
+      }
+      tbody tr.active {
+        background: linear-gradient(
+          90deg,
+          rgba(47, 107, 255, 0.1),
+          transparent 70%
+        );
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .mono {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Consolas,
+          "Noto Sans Mono CJK JP", monospace;
+      }
+      .empty {
+        padding: 18px 14px;
+        color: var(--muted);
+      }
+
+      /* details */
+      .detail {
+        padding: 14px;
+      }
+      .meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      @media (max-width: 980px) {
+        .meta {
+          grid-template-columns: 1fr;
+        }
+      }
+      .kv {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: #fbfcff;
+      }
+      .kv .k {
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .kv .v {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1b2a40;
+        word-break: break-word;
+      }
+      .divider {
+        height: 1px;
+        background: var(--line);
+        margin: 12px 0;
+      }
+      .md {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 12px;
+        background: #ffffff;
+        overflow: auto;
+        max-height: 56vh;
+      }
+      .md h1,
+      .md h2,
+      .md h3 {
+        margin: 10px 0 6px;
+      }
+      .md h1 {
+        font-size: 18px;
+      }
+      .md h2 {
+        font-size: 16px;
+      }
+      .md h3 {
+        font-size: 14px;
+      }
+      .md p {
+        margin: 8px 0;
+        line-height: 1.6;
+      }
+      .md ul,
+      .md ol {
+        margin: 8px 0 8px 20px;
+      }
+      .md code {
+        background: #f3f5ff;
+        border: 1px solid #e7ebff;
+        padding: 0 5px;
+        border-radius: 6px;
+        font-size: 12px;
+      }
+      .md pre {
+        background: #0f172a;
+        color: #e6edf7;
+        padding: 12px;
+        border-radius: 12px;
+        overflow: auto;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .md pre code {
+        background: transparent;
+        border: none;
+        padding: 0;
+        color: inherit;
+        font-size: 12px;
+      }
+
+      .foot {
+        padding: 12px 14px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      a.fake {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 700;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="title">
+        <h1>DMP Summary</h1>
+        <div class="sub">
+          複数の .md をアップロード → Apply →
+          一覧＋クリックで詳細（検索・ソート対応）
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <!-- LEFT: List -->
+      <section class="card">
+        <div class="card-h">
+          <div class="controls">
+            <input
+              id="fileInput"
+              type="file"
+              multiple
+              accept=".md,text/markdown"
+            />
+            <button id="applyBtn" class="btn primary">Apply</button>
+            <button id="clearBtn" class="btn">Clear</button>
+          </div>
+
+          <div class="controls search">
+            <input
+              id="q"
+              type="search"
+              placeholder="検索（ファイル名 / 作成者 / 日付 / 本文）"
+            />
+            <span id="countPill" class="pill">0 files</span>
+          </div>
+        </div>
+
+        <div style="max-height: 62vh; overflow: auto">
+          <table>
+            <thead>
+              <tr>
+                <th data-key="fileName">
+                  ファイル名 <span class="sort" id="sort-fileName"></span>
+                </th>
+                <th data-key="createdBy">
+                  作成者 <span class="sort" id="sort-createdBy"></span>
+                </th>
+                <th data-key="createdAt">
+                  作成日 <span class="sort" id="sort-createdAt"></span>
+                </th>
+                <th data-key="updatedAt">
+                  最終更新日 <span class="sort" id="sort-updatedAt"></span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <tr>
+                <td colspan="4" class="empty">
+                  まず .md を複数選択して、Apply を押してください。
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="foot">
+          <div>
+            <span class="pill ok">初期ソート：ファイル名</span>
+            <span class="pill">列ヘッダクリックで昇順/降順</span>
+          </div>
+          <div>
+            <span class="pill warn"
+              >YAMLなしの古いmdは作成者/作成日が「—」になることがあります</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Detail -->
+      <section class="card">
+        <div class="card-h">
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <strong>詳細</strong>
+            <span id="selectedPill" class="pill">未選択</span>
+          </div>
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <span class="pill">クリックで内容表示</span>
+          </div>
+        </div>
+
+        <div class="detail">
+          <div class="meta" id="metaGrid">
+            <div class="kv">
+              <div class="k">ファイル名</div>
+              <div class="v muted">—</div>
+            </div>
+            <div class="kv">
+              <div class="k">作成者（createdBy）</div>
+              <div class="v muted">—</div>
+            </div>
+            <div class="kv">
+              <div class="k">作成日（createdAt）</div>
+              <div class="v muted">—</div>
+            </div>
+            <div class="kv">
+              <div class="k">最終更新日（updatedAt）</div>
+              <div class="v muted">—</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              gap: 10px;
+              flex-wrap: wrap;
+            "
+          >
+            <div class="muted" style="font-size: 12px">
+              本文（Markdown表示）
+            </div>
+            <div>
+              <a class="fake" id="toggleRaw">RAW表示に切替</a>
+            </div>
+          </div>
+          <div class="md" id="mdView"></div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // ---------- helpers ----------
+      const $ = (id) => document.getElementById(id);
+
+      function escapeHtml(s) {
+        return String(s ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function isIsoDate(s) {
+        return typeof s === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(s.trim());
+      }
+
+      function dateToNumber(s) {
+        if (!isIsoDate(s)) return NaN;
+        return Number(s.replaceAll("-", ""));
+      }
+
+      // ---------- YAML front-matter parser (robust) ----------
+      function parseFrontMatter(mdText) {
+        let text = String(mdText ?? "");
+
+        // 先頭BOM除去 + 先頭の空白/改行を少しだけ許容
+        text = text.replace(/^\uFEFF/, ""); // BOM
+        text = text.replace(/^\s+/, ""); // leading whitespace/newlines
+
+        // front-matter: --- \n ... \n ---
+        const m = text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(\r?\n|$)/);
+        if (!m) return { fm: null, body: text };
+
+        const fmBlock = m[1];
+        const body = text.slice(m[0].length);
+
+        const fm = {};
+        const lines = fmBlock.split(/\r?\n/);
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+
+          if (!line.trim()) continue;
+
+          const mm = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
+          if (!mm) continue;
+
+          const key = mm[1];
+          let val = mm[2] ?? "";
+
+          // block scalar: key: |
+          if (val.trim() === "|") {
+            const buf = [];
+            i++;
+            while (i < lines.length) {
+              const L = lines[i];
+
+              // 次のkeyっぽい行に来たら終了（ただしインデント行は続き）
+              if (/^[A-Za-z0-9_]+:\s*/.test(L) && !/^\s+/.test(L)) {
+                i--;
+                break;
+              }
+              buf.push(L.replace(/^\s{2}/, "")); // 先頭2スペースだけ落とす
+              i++;
+            }
+            fm[key] = buf.join("\n");
+            continue;
+          }
+
+          // クォート除去
+          val = val.trim();
+          if (
+            (val.startsWith('"') && val.endsWith('"')) ||
+            (val.startsWith("'") && val.endsWith("'"))
+          ) {
+            val = val.slice(1, -1);
+          }
+          fm[key] = val;
+        }
+
+        return { fm, body };
+      }
+      // ---------- fallback updatedAt from body ----------
+      function findUpdatedAtFromBody(body) {
+        const m = String(body ?? "").match(
+          /最終更新\\s*[:：]\\s*(\\d{4}-\\d{2}-\\d{2})/,
+        );
+        return m ? m[1] : "";
+      }
+
+      // ---------- tiny markdown renderer (enough for notes) ----------
+      function renderMarkdown(md) {
+        const src = String(md ?? "");
+        // fenced code blocks
+        const parts = src.split(/```/);
+        let html = "";
+        for (let i = 0; i < parts.length; i++) {
+          if (i % 2 === 1) {
+            // code block
+            const code = parts[i].replace(/^\\w*\\n/, ""); // drop language line if any
+            html += "<pre><code>" + escapeHtml(code) + "</code></pre>";
+          } else {
+            html += renderMarkdownNoFence(parts[i]);
+          }
+        }
+        return html;
+      }
+
+      function inlineFormat(s) {
+        let x = escapeHtml(s);
+        // inline code
+        x = x.replace(/`([^`]+)`/g, "<code>$1</code>");
+        // bold
+        x = x.replace(/\\*\\*([^*]+)\\*\\*/g, "<strong>$1</strong>");
+        return x;
+      }
+
+      function renderMarkdownNoFence(chunk) {
+        const lines = String(chunk ?? "").split(/\\r?\\n/);
+        let out = "";
+        let inUl = false;
+        let inOl = false;
+
+        function closeLists() {
+          if (inUl) {
+            out += "</ul>";
+            inUl = false;
+          }
+          if (inOl) {
+            out += "</ol>";
+            inOl = false;
+          }
+        }
+
+        for (const line of lines) {
+          const t = line.trim();
+
+          if (!t) {
+            closeLists();
+            continue;
+          }
+
+          // headings
+          if (/^###\\s+/.test(t)) {
+            closeLists();
+            out += "<h3>" + inlineFormat(t.replace(/^###\\s+/, "")) + "</h3>";
+            continue;
+          }
+          if (/^##\\s+/.test(t)) {
+            closeLists();
+            out += "<h2>" + inlineFormat(t.replace(/^##\\s+/, "")) + "</h2>";
+            continue;
+          }
+          if (/^#\\s+/.test(t)) {
+            closeLists();
+            out += "<h1>" + inlineFormat(t.replace(/^#\\s+/, "")) + "</h1>";
+            continue;
+          }
+
+          // unordered list
+          if (/^[-*]\\s+/.test(t)) {
+            if (inOl) {
+              out += "</ol>";
+              inOl = false;
+            }
+            if (!inUl) {
+              out += "<ul>";
+              inUl = true;
+            }
+            out += "<li>" + inlineFormat(t.replace(/^[-*]\\s+/, "")) + "</li>";
+            continue;
+          }
+
+          // ordered list
+          if (/^\\d+\\.\\s+/.test(t)) {
+            if (inUl) {
+              out += "</ul>";
+              inUl = false;
+            }
+            if (!inOl) {
+              out += "<ol>";
+              inOl = true;
+            }
+            out +=
+              "<li>" + inlineFormat(t.replace(/^\\d+\\.\\s+/, "")) + "</li>";
+            continue;
+          }
+
+          // paragraph
+          closeLists();
+          out += "<p>" + inlineFormat(t) + "</p>";
+        }
+        closeLists();
+        return out;
+      }
+
+      // ---------- state ----------
+      let entries = []; // all parsed entries
+      let filtered = []; // filtered+sorted
+      let sortKey = "fileName";
+      let sortDir = "asc"; // asc|desc
+      let selectedIndex = -1;
+      let showRaw = false;
+
+      // ---------- core ----------
+      async function readFiles(fileList) {
+        const files = Array.from(fileList || []);
+        const reads = files.map(
+          (f) =>
+            new Promise((resolve, reject) => {
+              const r = new FileReader();
+              r.onload = () =>
+                resolve({ file: f, text: String(r.result ?? "") });
+              r.onerror = () => reject(r.error);
+              r.readAsText(f, "utf-8");
+            }),
+        );
+        return Promise.all(reads);
+      }
+
+      function buildEntry(file, mdText) {
+        const fileName = file?.name || "unknown.md";
+        const { fm, body } = parseFrontMatter(mdText);
+
+        const createdBy = fm?.createdBy || fm?.creator || fm?.created_by || "";
+        const createdAt = fm?.createdAt || fm?.created_at || "";
+        const updatedAt =
+          fm?.updatedAt || fm?.updated_at || findUpdatedAtFromBody(body) || "";
+
+        // 検索用テキスト（本文も含める）
+        const hay = [
+          fileName,
+          createdBy,
+          createdAt,
+          updatedAt,
+          fm?.fileBase || "",
+          fm?.pmid || "",
+          fm?.paperTitle || "",
+          fm?.journal || "",
+          body,
+        ]
+          .join("\\n")
+          .toLowerCase();
+
+        return {
+          fileName,
+          createdBy: createdBy || "—",
+          createdAt: createdAt || "—",
+          updatedAt: updatedAt || "—",
+          fm: fm || {},
+          body,
+          raw: String(mdText ?? ""),
+          hay,
+        };
+      }
+
+      function applyFilterSort() {
+        const q = $("q").value.trim().toLowerCase();
+        let arr = entries.slice();
+
+        if (q) {
+          arr = arr.filter((e) => e.hay.includes(q));
+        }
+
+        arr.sort((a, b) => compareByKey(a, b, sortKey, sortDir));
+        filtered = arr;
+        renderTable();
+        updateCount();
+        // selection reset if out of range
+        if (selectedIndex >= filtered.length) {
+          selectedIndex = -1;
+          renderDetail(null);
+        }
+      }
+
+      function compareByKey(a, b, key, dir) {
+        const mul = dir === "asc" ? 1 : -1;
+        const av = a[key] ?? "";
+        const bv = b[key] ?? "";
+
+        // date columns
+        if (key === "createdAt" || key === "updatedAt") {
+          const an = dateToNumber(av);
+          const bn = dateToNumber(bv);
+          if (!Number.isNaN(an) && !Number.isNaN(bn)) return (an - bn) * mul;
+          // missing dates go bottom
+          if (Number.isNaN(an) && !Number.isNaN(bn)) return 1 * mul;
+          if (!Number.isNaN(an) && Number.isNaN(bn)) return -1 * mul;
+        }
+
+        // string
+        return String(av).localeCompare(String(bv), "ja") * mul;
+      }
+
+      function renderTable() {
+        const tb = $("tbody");
+        if (!filtered.length) {
+          tb.innerHTML = `<tr><td colspan="4" class="empty">該当なし（検索条件を見直してください）</td></tr>`;
+          clearSortIcons();
+          setSortIcon();
+          return;
+        }
+
+        tb.innerHTML = filtered
+          .map((e, idx) => {
+            const active = idx === selectedIndex ? "active" : "";
+            return `
+          <tr class="${active}" data-idx="${idx}">
+            <td class="mono">${escapeHtml(e.fileName)}</td>
+            <td>${escapeHtml(e.createdBy)}</td>
+            <td class="mono">${escapeHtml(e.createdAt)}</td>
+            <td class="mono">${escapeHtml(e.updatedAt)}</td>
+          </tr>
+        `;
+          })
+          .join("");
+
+        // row click
+        tb.querySelectorAll("tr[data-idx]").forEach((tr) => {
+          tr.addEventListener("click", () => {
+            selectedIndex = Number(tr.dataset.idx);
+            const entry = filtered[selectedIndex];
+            renderTable(); // highlight
+            renderDetail(entry);
+          });
+        });
+
+        clearSortIcons();
+        setSortIcon();
+      }
+
+      function clearSortIcons() {
+        ["fileName", "createdBy", "createdAt", "updatedAt"].forEach((k) => {
+          const el = $("sort-" + k);
+          if (el) el.textContent = "";
+        });
+      }
+      function setSortIcon() {
+        const el = $("sort-" + sortKey);
+        if (el) el.textContent = sortDir === "asc" ? "▲" : "▼";
+      }
+
+      function updateCount() {
+        const total = entries.length;
+        const shown = filtered.length;
+        $("countPill").textContent = `${shown}/${total} files`;
+      }
+
+      function renderDetail(entry) {
+        const pill = $("selectedPill");
+        const metaGrid = $("metaGrid");
+        const mdView = $("mdView");
+
+        if (!entry) {
+          pill.textContent = "未選択";
+          metaGrid.innerHTML = `
+          <div class="kv"><div class="k">ファイル名</div><div class="v muted">—</div></div>
+          <div class="kv"><div class="k">作成者（createdBy）</div><div class="v muted">—</div></div>
+          <div class="kv"><div class="k">作成日（createdAt）</div><div class="v muted">—</div></div>
+          <div class="kv"><div class="k">最終更新日（updatedAt）</div><div class="v muted">—</div></div>
+        `;
+          mdView.innerHTML = "";
+          return;
+        }
+
+        pill.textContent = entry.fileName;
+
+        metaGrid.innerHTML = `
+        <div class="kv"><div class="k">ファイル名</div><div class="v mono">${escapeHtml(entry.fileName)}</div></div>
+        <div class="kv"><div class="k">作成者（createdBy）</div><div class="v">${escapeHtml(entry.createdBy)}</div></div>
+        <div class="kv"><div class="k">作成日（createdAt）</div><div class="v mono">${escapeHtml(entry.createdAt)}</div></div>
+        <div class="kv"><div class="k">最終更新日（updatedAt）</div><div class="v mono">${escapeHtml(entry.updatedAt)}</div></div>
+      `;
+
+        if (showRaw) {
+          mdView.innerHTML = `<pre><code>${escapeHtml(entry.raw)}</code></pre>`;
+        } else {
+          // body only (remove YAML)
+          mdView.innerHTML = renderMarkdown(entry.body);
+        }
+      }
+
+      // ---------- events ----------
+      $("applyBtn").addEventListener("click", async () => {
+        const files = $("fileInput").files;
+        if (!files || !files.length) {
+          alert("まず .md ファイルを複数選択してください。");
+          return;
+        }
+        try {
+          const items = await readFiles(files);
+          entries = items.map((x) => buildEntry(x.file, x.text));
+
+          // 初期：ファイル名でソート
+          sortKey = "fileName";
+          sortDir = "asc";
+          selectedIndex = -1;
+
+          applyFilterSort();
+          renderDetail(null);
+        } catch (err) {
+          console.error(err);
+          alert("読み込み中にエラーが発生しました。");
+        }
+      });
+
+      $("clearBtn").addEventListener("click", () => {
+        $("fileInput").value = "";
+        $("q").value = "";
+        entries = [];
+        filtered = [];
+        selectedIndex = -1;
+        $("tbody").innerHTML =
+          `<tr><td colspan="4" class="empty">まず .md を複数選択して、Apply を押してください。</td></tr>`;
+        $("countPill").textContent = "0 files";
+        renderDetail(null);
+      });
+
+      $("q").addEventListener("input", () => {
+        applyFilterSort();
+      });
+
+      // header sort
+      document.querySelectorAll("thead th[data-key]").forEach((th) => {
+        th.addEventListener("click", () => {
+          const key = th.dataset.key;
+          if (key === sortKey) {
+            sortDir = sortDir === "asc" ? "desc" : "asc";
+          } else {
+            sortKey = key;
+            sortDir = "asc";
+          }
+          applyFilterSort();
+        });
+      });
+
+      $("toggleRaw").addEventListener("click", () => {
+        showRaw = !showRaw;
+        $("toggleRaw").textContent = showRaw
+          ? "Markdown表示に切替"
+          : "RAW表示に切替";
+        const entry = selectedIndex >= 0 ? filtered[selectedIndex] : null;
+        renderDetail(entry);
+      });
+    </script>
+  </body>
+</html>
