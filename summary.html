@@ -28,13 +28,14 @@
       * {
         box-sizing: border-box;
       }
+
       body {
         margin: 0;
         font-family:
           ui-sans-serif,
           system-ui,
           -apple-system,
-          Segoe UI,
+          "Segoe UI",
           Roboto,
           "Hiragino Kaku Gothic ProN",
           "Noto Sans JP",
@@ -128,7 +129,7 @@
         appearance: none;
         border: 1px solid var(--line);
         background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
-        padding: 10px 12px;
+        padding: 10px 14px;
         border-radius: 12px;
         cursor: pointer;
         font-weight: 700;
@@ -136,27 +137,26 @@
         box-shadow: 0 6px 16px rgba(23, 42, 88, 0.08);
         user-select: none;
       }
+
       .btn.primary {
         border-color: rgba(47, 107, 255, 0.25);
         background: linear-gradient(180deg, #eaf1ff 0%, #f7fbff 100%);
         color: #0f2c92;
       }
+
       .btn.small {
         padding: 8px 10px;
         font-size: 12px;
         border-radius: 10px;
         box-shadow: none;
       }
+
       .btn:active {
         transform: translateY(1px);
       }
 
-      input[type="file"] {
-        border: 1px dashed rgba(47, 107, 255, 0.35);
-        padding: 10px 12px;
-        border-radius: 12px;
-        background: #fbfcff;
-        width: min(520px, 100%);
+      .hiddenInput {
+        display: none;
       }
 
       .search {
@@ -165,6 +165,7 @@
         align-items: center;
         width: min(520px, 100%);
       }
+
       .search input {
         width: 100%;
         border: 1px solid var(--line);
@@ -184,6 +185,16 @@
         white-space: nowrap;
       }
 
+      .folderLabel {
+        font-size: 13px;
+        color: #243249;
+        font-weight: 700;
+        max-width: 320px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
       .splitter {
         width: 10px;
         cursor: col-resize;
@@ -191,6 +202,7 @@
         align-items: center;
         justify-content: center;
       }
+
       .splitter::before {
         content: "";
         width: 4px;
@@ -209,11 +221,13 @@
         overflow: auto;
         max-height: 64vh;
       }
+
       table {
         width: 100%;
         border-collapse: collapse;
         font-size: 13px;
       }
+
       thead th {
         text-align: left;
         padding: 12px 14px;
@@ -226,23 +240,28 @@
         top: 0;
         z-index: 1;
       }
+
       thead th .sort {
         font-size: 11px;
         color: var(--muted);
         margin-left: 6px;
       }
+
       tbody td {
         padding: 12px 14px;
         border-bottom: 1px solid var(--line);
         color: #243249;
         vertical-align: top;
       }
+
       tbody tr {
         cursor: pointer;
       }
+
       tbody tr:hover {
         background: #f3f7ff;
       }
+
       tbody tr.active {
         background: linear-gradient(
           90deg,
@@ -250,9 +269,11 @@
           transparent 70%
         );
       }
+
       .mono {
         font-family: var(--mono);
       }
+
       .empty {
         padding: 18px 14px;
         color: var(--muted);
@@ -272,6 +293,7 @@
         grid-template-columns: 1fr 1fr;
         gap: 10px;
       }
+
       @media (max-width: 980px) {
         .meta {
           grid-template-columns: 1fr;
@@ -285,11 +307,13 @@
         background: #fbfcff;
         min-height: 56px;
       }
+
       .kv .k {
         font-size: 11px;
         color: var(--muted);
         margin-bottom: 4px;
       }
+
       .kv .v {
         font-size: 13px;
         font-weight: 800;
@@ -304,12 +328,14 @@
         justify-content: space-between;
         flex-wrap: wrap;
       }
+
       .tabBtns {
         display: flex;
         gap: 8px;
         align-items: center;
         flex-wrap: wrap;
       }
+
       .tab {
         padding: 8px 10px;
         border-radius: 999px;
@@ -321,6 +347,7 @@
         user-select: none;
         font-size: 12px;
       }
+
       .tab.active {
         border-color: rgba(47, 107, 255, 0.3);
         background: #eaf1ff;
@@ -332,7 +359,7 @@
         border-radius: 12px;
         background: #ffffff;
         overflow: auto;
-        padding: 14px 14px;
+        padding: 14px;
         flex: 1;
         min-height: 40vh;
       }
@@ -342,33 +369,41 @@
         line-height: 1.75;
         font-size: 14px;
       }
+
       .rendered h1 {
         font-size: 20px;
         margin: 12px 0 8px;
       }
+
       .rendered h2 {
         font-size: 18px;
         margin: 14px 0 8px;
       }
+
       .rendered h3 {
         font-size: 16px;
         margin: 12px 0 6px;
       }
+
       .rendered p {
         margin: 10px 0;
       }
+
       .rendered ul,
       .rendered ol {
         margin: 10px 0 10px 22px;
       }
+
       .rendered li {
         margin: 6px 0;
       }
+
       .rendered hr {
         border: 0;
         border-top: 1px solid var(--line);
         margin: 14px 0;
       }
+
       .rendered blockquote {
         margin: 10px 0;
         padding: 10px 12px;
@@ -377,18 +412,21 @@
         border-radius: 10px;
         color: #2b3a55;
       }
+
       .rendered table {
         width: 100%;
         border-collapse: collapse;
         margin: 10px 0;
         font-size: 13px;
       }
+
       .rendered th,
       .rendered td {
         border: 1px solid var(--line);
         padding: 8px 10px;
         vertical-align: top;
       }
+
       .rendered code {
         font-family: var(--mono);
         background: #f3f5ff;
@@ -397,6 +435,7 @@
         border-radius: 7px;
         font-size: 12px;
       }
+
       .rendered pre {
         background: #0f172a;
         color: #e6edf7;
@@ -405,6 +444,7 @@
         overflow: auto;
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
+
       .rendered pre code {
         background: transparent;
         border: none;
@@ -421,6 +461,7 @@
         white-space: pre-wrap;
         word-break: break-word;
       }
+
       pre.raw.nowrap {
         white-space: pre;
         word-break: normal;
@@ -444,8 +485,7 @@
       <div class="title">
         <h1>DMP Summary</h1>
         <div class="sub">
-          フォルダを選択 → Apply → フォルダ内の .md 一覧 →
-          クリックで詳細（HTML/RAW）
+          フォルダを選択 → 自動読み込み → 一覧 → クリックで詳細（HTML/RAW）
         </div>
       </div>
     </header>
@@ -456,15 +496,18 @@
           <div class="controls">
             <input
               id="folderInput"
+              class="hiddenInput"
               type="file"
               webkitdirectory
               directory
               multiple
               accept=".md,text/markdown"
             />
-            <button id="applyBtn" class="btn primary">Apply</button>
+            <button id="folderBtn" class="btn primary">フォルダを選択</button>
+            <span id="folderName" class="folderLabel">未選択</span>
             <button id="clearBtn" class="btn">Clear</button>
           </div>
+
           <div class="controls search">
             <input
               id="q"
@@ -496,7 +539,8 @@
             <tbody id="tbody">
               <tr>
                 <td colspan="4" class="empty">
-                  まず .md を含むフォルダを選択して、Apply を押してください。
+                  「フォルダを選択」を押して、md
+                  を含むフォルダを選んでください。
                 </td>
               </tr>
             </tbody>
@@ -531,7 +575,7 @@
         </div>
 
         <div class="detail">
-          <div class="meta" id="metaGrid">
+          <div class="meta">
             <div class="kv">
               <div class="k">ファイル名</div>
               <div class="v" id="m_fileName">—</div>
@@ -655,12 +699,14 @@
         if (window.marked && typeof window.marked.parse === "function") {
           return window.marked.parse(md, { breaks: true, gfm: true });
         }
+
         const safe = escapeHtml(md)
           .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
           .replace(/^##\s+(.+)$/gm, "<h2>$1</h2>")
           .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>")
           .replace(/\n{2,}/g, "</p><p>")
           .replace(/\n/g, "<br>");
+
         return "<p>" + safe + "</p>";
       }
 
@@ -740,6 +786,7 @@
           if (Number.isNaN(an) && !Number.isNaN(bn)) return 1 * mul;
           if (!Number.isNaN(an) && Number.isNaN(bn)) return -1 * mul;
         }
+
         return String(av).localeCompare(String(bv), "ja") * mul;
       }
 
@@ -763,8 +810,15 @@
 
       function renderTable() {
         const tb = $("tbody");
+
         if (!filtered.length) {
-          tb.innerHTML = `<tr><td colspan="4" class="empty">該当なし（検索条件を見直してください）</td></tr>`;
+          tb.innerHTML = `
+            <tr>
+              <td colspan="4" class="empty">
+                該当する md がありません。
+              </td>
+            </tr>
+          `;
           clearSortIcons();
           setSortIcon();
           return;
@@ -859,17 +913,38 @@
         setTab("rendered");
       }
 
-      $("applyBtn").addEventListener("click", async () => {
-        const files = $("folderInput").files;
+      function getFolderName(files) {
+        if (!files || !files.length) return "";
+        const path = files[0].webkitRelativePath || "";
+        if (!path) return "";
+        return path.split("/")[0] || "";
+      }
+
+      async function loadFolder(files) {
         if (!files || !files.length) {
-          alert("まず .md を含むフォルダを選択してください。");
+          alert("フォルダを選択してください。");
           return;
         }
 
         try {
+          const folder = getFolderName(files);
+          $("folderName").textContent = folder || "フォルダ名不明";
+
           const items = await readFiles(files);
+
           if (!items.length) {
-            alert("選択したフォルダ内に .md ファイルがありません。");
+            entries = [];
+            filtered = [];
+            selectedIndex = -1;
+            $("tbody").innerHTML = `
+              <tr>
+                <td colspan="4" class="empty">
+                  選択したフォルダ内に .md ファイルがありません。
+                </td>
+              </tr>
+            `;
+            $("countPill").textContent = "0 files";
+            renderDetail(null);
             return;
           }
 
@@ -878,21 +953,42 @@
           sortDir = "asc";
           selectedIndex = -1;
           applyFilterSort();
-          renderDetail(null);
+
+          if (filtered.length > 0) {
+            selectedIndex = 0;
+            renderTable();
+            renderDetail(filtered[0]);
+          } else {
+            renderDetail(null);
+          }
         } catch (err) {
           console.error(err);
           alert("読み込み中にエラーが発生しました。");
         }
+      }
+
+      $("folderBtn").addEventListener("click", () => {
+        $("folderInput").click();
+      });
+
+      $("folderInput").addEventListener("change", async (e) => {
+        await loadFolder(e.target.files);
       });
 
       $("clearBtn").addEventListener("click", () => {
         $("folderInput").value = "";
+        $("folderName").textContent = "未選択";
         $("q").value = "";
         entries = [];
         filtered = [];
         selectedIndex = -1;
-        $("tbody").innerHTML =
-          `<tr><td colspan="4" class="empty">まず .md を含むフォルダを選択して、Apply を押してください。</td></tr>`;
+        $("tbody").innerHTML = `
+          <tr>
+            <td colspan="4" class="empty">
+              「フォルダを選択」を押して、md を含むフォルダを選んでください。
+            </td>
+          </tr>
+        `;
         $("countPill").textContent = "0 files";
         renderDetail(null);
       });
@@ -926,7 +1022,7 @@
       $("copyRawBtn").addEventListener("click", async () => {
         const t = $("rawView").textContent || "";
         if (!t) {
-          alert("RAWがありません（行を選択してください）");
+          alert("RAWがありません。");
           return;
         }
         await navigator.clipboard.writeText(t);
@@ -935,7 +1031,7 @@
       $("copyHtmlBtn").addEventListener("click", async () => {
         const html = $("renderedView").innerHTML || "";
         if (!html) {
-          alert("HTMLがありません（行を選択してください）");
+          alert("HTMLがありません。");
           return;
         }
         await navigator.clipboard.writeText(html);
