@@ -273,7 +273,7 @@ input:focus, textarea:focus{
   text-align: left;
 }
 
-.howtoLink{
+.howtoLink, .summaryLink{
   display: inline-block;
   padding: 6px 60px;
   font-size: 16px;
@@ -289,9 +289,14 @@ input:focus, textarea:focus{
   transition: all .15s ease;
 }
 
-.howtoLink:hover{
+.howtoLink:hover, .summaryLink:hover{
   transform: translateY(-2px);
   box-shadow: 0 14px 30px rgba(37,99,235,0.35);
+}
+
+.summaryLink{
+  margin-left:20px;
+  padding:6px 40px;
 }
 
 /* ===== HERO TITLE ===== */

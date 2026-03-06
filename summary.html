@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DMP Summary</title>
 
-    <!-- Marked (Markdown -> HTML). GitHub Pagesなら普通に読めます -->
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
@@ -83,7 +82,7 @@
         margin: 0 auto;
         padding: 10px 18px 26px;
         display: grid;
-        grid-template-columns: 3fr 10px 5fr; /* 左:バー:右 */
+        grid-template-columns: 3fr 10px 5fr;
         gap: 0;
         align-items: stretch;
       }
@@ -185,7 +184,6 @@
         white-space: nowrap;
       }
 
-      /* splitter */
       .splitter {
         width: 10px;
         cursor: col-resize;
@@ -206,7 +204,6 @@
         border: 1px solid rgba(47, 107, 255, 0.14);
       }
 
-      /* table */
       .tableWrap {
         flex: 1;
         overflow: auto;
@@ -261,7 +258,6 @@
         color: var(--muted);
       }
 
-      /* details */
       .detail {
         padding: 14px;
         display: flex;
@@ -341,7 +337,6 @@
         min-height: 40vh;
       }
 
-      /* rendered html */
       .rendered {
         max-width: 100%;
         line-height: 1.75;
@@ -418,17 +413,16 @@
         font-size: 12px;
       }
 
-      /* raw */
       pre.raw {
         margin: 0;
         font-family: var(--mono);
         font-size: 12px;
         line-height: 1.6;
-        white-space: pre-wrap; /* 標準で折り返し */
+        white-space: pre-wrap;
         word-break: break-word;
       }
       pre.raw.nowrap {
-        white-space: pre; /* 折り返しOFF */
+        white-space: pre;
         word-break: normal;
       }
 
@@ -450,20 +444,21 @@
       <div class="title">
         <h1>DMP Summary</h1>
         <div class="sub">
-          複数の .md をアップロード → Apply → 一覧（検索・ソート）→
+          フォルダを選択 → Apply → フォルダ内の .md 一覧 →
           クリックで詳細（HTML/RAW）
         </div>
       </div>
     </header>
 
     <div class="wrap" id="wrap">
-      <!-- LEFT -->
       <section class="card" id="leftCard">
         <div class="card-h">
           <div class="controls">
             <input
-              id="fileInput"
+              id="folderInput"
               type="file"
+              webkitdirectory
+              directory
               multiple
               accept=".md,text/markdown"
             />
@@ -501,7 +496,7 @@
             <tbody id="tbody">
               <tr>
                 <td colspan="4" class="empty">
-                  まず .md を複数選択して、Apply を押してください。
+                  まず .md を含むフォルダを選択して、Apply を押してください。
                 </td>
               </tr>
             </tbody>
@@ -510,14 +505,12 @@
 
         <div class="foot">
           <div class="pill">列ヘッダクリックで昇順/降順</div>
-          <div class="pill">分割バーで幅調整できます</div>
+          <div class="pill">サブフォルダ内の .md も読めます</div>
         </div>
       </section>
 
-      <!-- SPLITTER -->
       <div class="splitter" id="splitter" title="ドラッグで幅を調整"></div>
 
-      <!-- RIGHT -->
       <section class="card" id="rightCard">
         <div class="card-h">
           <div
@@ -578,7 +571,6 @@
     </div>
 
     <script>
-      // ---------- helpers ----------
       const $ = (id) => document.getElementById(id);
 
       function escapeHtml(s) {
@@ -593,16 +585,16 @@
       function isIsoDate(s) {
         return typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.trim());
       }
+
       function dateToNumber(s) {
         if (!isIsoDate(s)) return NaN;
         return Number(s.replaceAll("-", ""));
       }
 
-      // ---------- YAML front-matter parser (robust) ----------
       function parseFrontMatter(mdText) {
         let text = String(mdText ?? "");
-        text = text.replace(/^\uFEFF/, ""); // BOM
-        text = text.replace(/^\s+/, ""); // leading whitespace/newlines
+        text = text.replace(/^\uFEFF/, "");
+        text = text.replace(/^\s+/, "");
 
         const m = text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(\r?\n|$)/);
         if (!m) return { fm: null, body: text };
@@ -659,14 +651,10 @@
         return m ? m[1] : "";
       }
 
-      // ---------- markdown -> html ----------
       function mdToHtml(md) {
-        // markedが読めるならそれを使う
         if (window.marked && typeof window.marked.parse === "function") {
-          // GitHub風に近づける軽いオプション
           return window.marked.parse(md, { breaks: true, gfm: true });
         }
-        // フォールバック：最低限
         const safe = escapeHtml(md)
           .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
           .replace(/^##\s+(.+)$/gm, "<h2>$1</h2>")
@@ -676,7 +664,6 @@
         return "<p>" + safe + "</p>";
       }
 
-      // ---------- state ----------
       let entries = [];
       let filtered = [];
       let sortKey = "fileName";
@@ -684,9 +671,11 @@
       let selectedIndex = -1;
       let rawWrap = true;
 
-      // ---------- file read ----------
       async function readFiles(fileList) {
-        const files = Array.from(fileList || []);
+        const files = Array.from(fileList || []).filter((f) =>
+          /\.md$/i.test(f.name),
+        );
+
         const reads = files.map(
           (f) =>
             new Promise((resolve, reject) => {
@@ -697,11 +686,15 @@
               r.readAsText(f, "utf-8");
             }),
         );
+
         return Promise.all(reads);
       }
 
       function buildEntry(file, mdText) {
-        const fileName = file?.name || "unknown.md";
+        const relativePath =
+          file?.webkitRelativePath || file?.name || "unknown.md";
+        const fileName = relativePath;
+
         const { fm, body } = parseFrontMatter(mdText);
 
         const createdBy = fm?.createdBy || fm?.creator || fm?.created_by || "";
@@ -756,6 +749,7 @@
           if (el) el.textContent = "";
         });
       }
+
       function setSortIcon() {
         const el = $("sort-" + sortKey);
         if (el) el.textContent = sortDir === "asc" ? "▲" : "▼";
@@ -780,13 +774,13 @@
           .map((e, idx) => {
             const active = idx === selectedIndex ? "active" : "";
             return `
-        <tr class="${active}" data-idx="${idx}">
-          <td class="mono">${escapeHtml(e.fileName)}</td>
-          <td>${escapeHtml(e.createdBy)}</td>
-          <td class="mono">${escapeHtml(e.createdAt)}</td>
-          <td class="mono">${escapeHtml(e.updatedAt)}</td>
-        </tr>
-      `;
+              <tr class="${active}" data-idx="${idx}">
+                <td class="mono">${escapeHtml(e.fileName)}</td>
+                <td>${escapeHtml(e.createdBy)}</td>
+                <td class="mono">${escapeHtml(e.createdAt)}</td>
+                <td class="mono">${escapeHtml(e.updatedAt)}</td>
+              </tr>
+            `;
           })
           .join("");
 
@@ -805,7 +799,11 @@
       function applyFilterSort() {
         const q = $("q").value.trim().toLowerCase();
         let arr = entries.slice();
-        if (q) arr = arr.filter((e) => e.hay.includes(q));
+
+        if (q) {
+          arr = arr.filter((e) => e.hay.includes(q));
+        }
+
         arr.sort((a, b) => compareByKey(a, b, sortKey, sortDir));
         filtered = arr;
         renderTable();
@@ -817,7 +815,6 @@
         }
       }
 
-      // ---------- detail ----------
       function setTab(mode) {
         const rendered = $("renderedView");
         const raw = $("rawView");
@@ -857,25 +854,25 @@
         $("m_createdBy").textContent = entry.createdBy;
         $("m_createdAt").textContent = entry.createdAt;
         $("m_updatedAt").textContent = entry.updatedAt;
-
-        // HTML view: body only
         $("renderedView").innerHTML = mdToHtml(entry.body);
-        // RAW view: whole
         $("rawView").textContent = entry.raw;
-
-        // default tab
         setTab("rendered");
       }
 
-      // ---------- events ----------
       $("applyBtn").addEventListener("click", async () => {
-        const files = $("fileInput").files;
+        const files = $("folderInput").files;
         if (!files || !files.length) {
-          alert("まず .md ファイルを複数選択してください。");
+          alert("まず .md を含むフォルダを選択してください。");
           return;
         }
+
         try {
           const items = await readFiles(files);
+          if (!items.length) {
+            alert("選択したフォルダ内に .md ファイルがありません。");
+            return;
+          }
+
           entries = items.map((x) => buildEntry(x.file, x.text));
           sortKey = "fileName";
           sortDir = "asc";
@@ -889,13 +886,13 @@
       });
 
       $("clearBtn").addEventListener("click", () => {
-        $("fileInput").value = "";
+        $("folderInput").value = "";
         $("q").value = "";
         entries = [];
         filtered = [];
         selectedIndex = -1;
         $("tbody").innerHTML =
-          `<tr><td colspan="4" class="empty">まず .md を複数選択して、Apply を押してください。</td></tr>`;
+          `<tr><td colspan="4" class="empty">まず .md を含むフォルダを選択して、Apply を押してください。</td></tr>`;
         $("countPill").textContent = "0 files";
         renderDetail(null);
       });
@@ -905,8 +902,9 @@
       document.querySelectorAll("thead th[data-key]").forEach((th) => {
         th.addEventListener("click", () => {
           const key = th.dataset.key;
-          if (key === sortKey) sortDir = sortDir === "asc" ? "desc" : "asc";
-          else {
+          if (key === sortKey) {
+            sortDir = sortDir === "asc" ? "desc" : "asc";
+          } else {
             sortKey = key;
             sortDir = "asc";
           }
@@ -922,8 +920,7 @@
         $("wrapToggleBtn").textContent = rawWrap
           ? "RAW折り返し：ON"
           : "RAW折り返し：OFF";
-        const raw = $("rawView");
-        raw.classList.toggle("nowrap", !rawWrap);
+        $("rawView").classList.toggle("nowrap", !rawWrap);
       });
 
       $("copyRawBtn").addEventListener("click", async () => {
@@ -944,7 +941,6 @@
         await navigator.clipboard.writeText(html);
       });
 
-      // ---------- splitter drag ----------
       (function setupSplitter() {
         const wrap = $("wrap");
         const splitter = $("splitter");
@@ -968,8 +964,6 @@
 
           const left = Math.max(minLeft, Math.min(x, total - minRight));
           const right = total - left - 10;
-
-          // grid-template-columns: left px | 10px | right px
           wrap.style.gridTemplateColumns = `${left}px 10px ${right}px`;
         });
 
