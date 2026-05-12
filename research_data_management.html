@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>基礎研究データ管理規則</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+JP:wght@300;400;500;700&display=swap");
+
+      :root {
+        --bg: #f5f4f0;
+        --surface: #ffffff;
+        --surface2: #f0ede6;
+        --border: #d4cfc4;
+        --accent: #2d5a8e;
+        --accent2: #c0392b;
+        --accent3: #27ae60;
+        --text: #1a1a1a;
+        --mono: "IBM Plex Mono", monospace;
+        --sans: "Noto Sans JP", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 15px;
+        line-height: 1.75;
+      }
+
+      header {
+        background: var(--accent);
+        color: white;
+        padding: 36px 48px 28px;
+        border-bottom: 4px solid #1a3f6b;
+      }
+      header .label {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #a8c4e0;
+        margin-bottom: 8px;
+      }
+      header h1 {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        margin-bottom: 6px;
+      }
+      header .subtitle {
+        font-size: 13px;
+        color: #c5d8ec;
+        font-weight: 300;
+      }
+
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 40px 32px 60px;
+      }
+      .section {
+        margin-bottom: 40px;
+      }
+
+      .section-title {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--accent);
+        border-left: 3px solid var(--accent);
+        padding-left: 10px;
+        margin-bottom: 16px;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 24px 28px;
+        margin-bottom: 16px;
+      }
+      .card h3 {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: var(--accent);
+      }
+
+      /* ── Tree ── */
+      .tree-wrap {
+        background: #1e2330;
+        border-radius: 6px;
+        padding: 20px 24px;
+        margin-bottom: 16px;
+        overflow-x: auto;
+      }
+      .tree-wrap pre {
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.9;
+        color: #c9d1d9;
+        white-space: pre;
+        margin: 0;
+      }
+      .d {
+        color: #79c0ff;
+        font-weight: 600;
+      }
+      .fc {
+        color: #7ee787;
+      }
+      .fi {
+        color: #ffa657;
+      }
+      .fn {
+        color: #ff7b72;
+      }
+      .ft {
+        color: #d2a8ff;
+      }
+      .cm {
+        color: #6e7681;
+        font-style: italic;
+      }
+
+      /* ── Tables ── */
+      .rule-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        table-layout: fixed;
+      }
+      .rule-table th {
+        background: var(--accent);
+        color: white;
+        padding: 8px 12px;
+        text-align: left;
+        font-weight: 500;
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+      }
+      .rule-table td {
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+        word-break: break-word;
+      }
+      .rule-table tr:last-child td {
+        border-bottom: none;
+      }
+      .rule-table tr:nth-child(even) td {
+        background: var(--surface2);
+      }
+
+      code {
+        font-family: var(--mono);
+        font-size: 12px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        padding: 1px 5px;
+        color: var(--accent2);
+        word-break: break-all;
+      }
+
+      .badge {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 11px;
+        padding: 2px 7px;
+        border-radius: 3px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        margin-right: 4px;
+        white-space: nowrap;
+      }
+      .badge-green {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #a3d4af;
+      }
+      .badge-red {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f0a8ad;
+      }
+      .badge-blue {
+        background: #d0e4f7;
+        color: #0c3f72;
+        border: 1px solid #a0c4e8;
+      }
+      .badge-gray {
+        background: #e8e8e8;
+        color: #444;
+        border: 1px solid #ccc;
+      }
+      .badge-orange {
+        background: #fff0d4;
+        color: #7a4000;
+        border: 1px solid #f4c27a;
+      }
+
+      .rules-list {
+        list-style: none;
+        padding: 0;
+      }
+      .rules-list li {
+        padding: 7px 0 7px 24px;
+        position: relative;
+        border-bottom: 1px dashed var(--border);
+        font-size: 14px;
+      }
+      .rules-list li:last-child {
+        border-bottom: none;
+      }
+      .rules-list li::before {
+        content: "▸";
+        position: absolute;
+        left: 0;
+        color: var(--accent);
+        font-size: 12px;
+        top: 9px;
+      }
+
+      .highlight-box {
+        background: #eaf3fb;
+        border-left: 4px solid var(--accent);
+        border-radius: 0 4px 4px 0;
+        padding: 13px 17px;
+        font-size: 13.5px;
+        margin-top: 12px;
+        color: #1a3a5c;
+        line-height: 1.8;
+      }
+      .warn-box {
+        background: #fff8e6;
+        border-left: 4px solid #e6a817;
+        border-radius: 0 4px 4px 0;
+        padding: 13px 17px;
+        font-size: 13.5px;
+        margin-top: 12px;
+        color: #5a3e00;
+      }
+      .green-box {
+        background: #eafbef;
+        border-left: 4px solid var(--accent3);
+        border-radius: 0 4px 4px 0;
+        padding: 13px 17px;
+        font-size: 13px;
+        margin-top: 12px;
+        color: #1a4a2a;
+        line-height: 1.9;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .step-list {
+        list-style: none;
+        padding: 0;
+      }
+      .step-list li {
+        display: flex;
+        gap: 14px;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: 14px;
+        align-items: flex-start;
+      }
+      .step-list li:last-child {
+        border-bottom: none;
+      }
+      .step-num {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        background: var(--accent);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 1px;
+      }
+
+      @media (max-width: 600px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+        header {
+          padding: 24px 20px;
+        }
+        .container {
+          padding: 24px 16px 48px;
+        }
+        .tree-wrap pre {
+          font-size: 11px;
+        }
+      }
+
+      footer {
+        background: #e8e4dc;
+        border-top: 1px solid var(--border);
+        padding: 20px 32px;
+        font-size: 11.5px;
+        color: #666;
+        line-height: 1.7;
+      }
+      footer p {
+        max-width: 860px;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="label">Laboratory Standard Operating Procedure</div>
+      <h1>基礎研究データ管理規則</h1>
+      <div class="subtitle">
+        大阪公立大学大学院医学研究科 細菌学教室 ／ 初版 2026-05-12
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- 01 基本方針 -->
+      <div class="section">
+        <div class="section-title">01 — 基本方針</div>
+        <div class="card">
+          <ul class="rules-list">
+            <li>
+              データファイルの保存形式は
+              <span class="badge badge-green">CSV</span> を優先する。<span
+                class="badge badge-red"
+                >XLSX</span
+              >
+              は極力使用しない（Excel固有の書式・マクロ依存を避け、長期可読性を確保する）。
+            </li>
+            <li>
+              画像・電気泳動・顕微鏡写真などの生データは
+              <span class="badge badge-blue">PNG / TIFF</span>
+              で保存する。JPEGは非可逆圧縮のため生データには使用しない。
+            </li>
+            <li>
+              解析スクリプトは
+              <span class="badge badge-blue">R / Python</span>
+              で作成し、コード自体をデータとして管理する。
+            </li>
+            <li>
+              フォルダ・ファイル名には
+              <strong
+                >スペース・全角文字・特殊記号（<code
+                  >/ \ : * ? " &lt; &gt; |</code
+                >）</strong
+              >
+              を使用しない。
+            </li>
+            <li>
+              一度確定した生データファイルは上書き・削除しない。修正は別ファイルとして保存する。
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 02 フォルダ構造 -->
+      <div class="section">
+        <div class="section-title">02 — フォルダ構造</div>
+
+        <div class="tree-wrap">
+          <pre><span class="d">ResearchData/</span>                               <span class="cm"># 研究データルートフォルダ</span>
+├── <span class="d">CandidaAuris_Mortality/</span>               <span class="cm"># 研究テーマごとのフォルダ</span>
+│   ├── <span class="d">20260512_GApng/</span>                 <span class="cm"># サブフォルダ：日付8桁_タグ</span>
+│   │   ├── <span class="fi">20260512_GApng_raw.png</span>
+│   │   ├── <span class="fc">20260512_GApng_measure.csv</span>
+│   │   └── <span class="ft">20260512_GApng_note.txt</span>      <span class="cm"># 実験メモ（フォルダ名も記載）</span>
+│   ├── <span class="d">20260514_MIC_caspofungin/</span>
+│   │   ├── <span class="fc">20260514_MIC_caspofungin_raw.csv</span>
+│   │   ├── <span class="fc">20260514_MIC_caspofungin_summary.csv</span>
+│   │   └── <span class="fn">20260514_MIC_caspofungin_analysis.R</span>
+│   ├── <span class="d">20260520_Biofilm_SEM/</span>
+│   │   ├── <span class="fi">20260520_Biofilm_SEM_001.tiff</span>
+│   │   ├── <span class="fi">20260520_Biofilm_SEM_002.tiff</span>
+│   │   └── <span class="fc">20260520_Biofilm_SEM_measure.csv</span>
+│   └── <span class="d">Archive_20260901_EID/</span>              <span class="cm"># 論文投稿時アーカイブ</span>
+│       ├── <span class="ft">README.txt</span>
+│       └── <span class="fc">...</span>
+├── <span class="d">MRSA_DFI/</span>
+│   └── <span class="d">20260601_Prevalence_survey/</span>
+│       └── <span class="fc">20260601_Prevalence_survey_data.csv</span>
+└── <span class="d">Acinetobacter_Capsule/</span>
+    └── <span class="d">20260610_WGS_results/</span>
+        ├── <span class="fc">20260610_WGS_results_metadata.csv</span>
+        └── <span class="fn">20260610_WGS_results_phylotree.py</span></pre>
+        </div>
+
+        <div class="highlight-box">
+          <strong>構造の原則：</strong>ResearchData →
+          研究テーマフォルダ（英語・スネークケース）→
+          実験サブフォルダ（<code>YYYYMMDD_タグ</code>）→
+          ファイル（<code>YYYYMMDD_タグ_種別.拡張子</code>）の3階層を基本とする。
+        </div>
+      </div>
+
+      <!-- 03 命名規則 -->
+      <div class="section">
+        <div class="section-title">03 — 命名規則</div>
+
+        <div class="card">
+          <h3>サブフォルダ命名：<code>YYYYMMDD_タグ</code></h3>
+          <table class="rule-table">
+            <colgroup>
+              <col style="width: 22%" />
+              <col style="width: 50%" />
+              <col style="width: 28%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>要素</th>
+                <th>内容</th>
+                <th>例</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>YYYYMMDD</code></td>
+                <td>実験実施日（8桁固定）</td>
+                <td><code>20260512</code></td>
+              </tr>
+              <tr>
+                <td><code>タグ</code></td>
+                <td>
+                  実験内容を表す短い英語。複数語はキャメルケースまたは
+                  <code>_</code> 区切り
+                </td>
+                <td><code>GApng</code><br /><code>MIC_caspofungin</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="tag-row">
+            <code>20260512_GApng</code>
+            <code>20260514_MIC_caspofungin</code>
+            <code>20260520_Biofilm_SEM</code>
+            <code>20260601_Prevalence_survey</code>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>ファイル命名：<code>YYYYMMDD_タグ_種別.拡張子</code></h3>
+          <table class="rule-table">
+            <colgroup>
+              <col style="width: 22%" />
+              <col style="width: 50%" />
+              <col style="width: 28%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>要素</th>
+                <th>内容</th>
+                <th>例</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>YYYYMMDD</code></td>
+                <td>フォルダと同じ日付</td>
+                <td><code>20260512</code></td>
+              </tr>
+              <tr>
+                <td><code>タグ</code></td>
+                <td>親フォルダのタグと一致させる</td>
+                <td><code>GApng</code></td>
+              </tr>
+              <tr>
+                <td><code>種別</code></td>
+                <td>データの種類を示す接尾語（下表参照）</td>
+                <td><code>raw</code>、<code>summary</code></td>
+              </tr>
+              <tr>
+                <td><code>拡張子</code></td>
+                <td>小文字を使用</td>
+                <td><code>.csv</code>、<code>.png</code>、<code>.R</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table class="rule-table" style="margin-top: 14px">
+            <colgroup>
+              <col style="width: 28%" />
+              <col style="width: 72%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>種別接尾語</th>
+                <th>意味</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>raw</code></td>
+                <td>生データ（改変不可）</td>
+              </tr>
+              <tr>
+                <td><code>summary</code></td>
+                <td>集計・要約データ</td>
+              </tr>
+              <tr>
+                <td><code>measure</code></td>
+                <td>計測値</td>
+              </tr>
+              <tr>
+                <td><code>analysis</code></td>
+                <td>解析スクリプト</td>
+              </tr>
+              <tr>
+                <td><code>note</code></td>
+                <td>実験ノート・メモ（テキスト）</td>
+              </tr>
+              <tr>
+                <td><code>fig</code></td>
+                <td>図（解析後の出力画像）</td>
+              </tr>
+              <tr>
+                <td><code>001, 002…</code></td>
+                <td>連番（画像が複数枚の場合）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 04 ファイル形式 -->
+      <div class="section">
+        <div class="section-title">04 — ファイル形式</div>
+        <div class="two-col">
+          <div class="card">
+            <h3>✅ 推奨形式</h3>
+            <ul class="rules-list">
+              <li>
+                <span class="badge badge-green">CSV</span>
+                表形式データ（UTF-8、BOMなし）
+              </li>
+              <li>
+                <span class="badge badge-green">PNG</span>
+                画像生データ（スクリーンショット含む）
+              </li>
+              <li>
+                <span class="badge badge-green">TIFF</span>
+                顕微鏡・SEM等の高精度画像
+              </li>
+              <li>
+                <span class="badge badge-green">TXT</span>
+                実験メモ・プレーンテキスト
+              </li>
+              <li>
+                <span class="badge badge-green">R / .py</span> 解析スクリプト
+              </li>
+              <li>
+                <span class="badge badge-green">Rmd / .ipynb</span>
+                解析ノートブック
+              </li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>❌ 避けるべき形式</h3>
+            <ul class="rules-list">
+              <li>
+                <span class="badge badge-red">XLSX</span> Excel形式（極力回避）
+              </li>
+              <li>
+                <span class="badge badge-red">JPEG</span>
+                非可逆圧縮のため生データへの使用を避ける
+              </li>
+              <li>
+                <span class="badge badge-red">DOC/DOCX</span>
+                データファイルとしての使用
+              </li>
+              <li>
+                <span class="badge badge-gray">Numbers</span>
+                Apple固有形式（互換性問題）
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="warn-box">
+          <strong>CSVの注意事項：</strong>文字コードは
+          UTF-8（BOMなし）を原則とする。Excelで開いた際に文字化けする場合があるが、R・Python・データベースとの互換性を優先する。ヘッダー行は1行目に配置し、列名は英語・スネークケース（例：<code>strain_id</code>、<code>mic_value</code>）推奨。
+        </div>
+      </div>
+
+      <!-- 05 バージョン管理 -->
+      <div class="section">
+        <div class="section-title">05 — バージョン管理・更新ルール</div>
+        <div class="card">
+          <ul class="rules-list">
+            <li>
+              生データ（<code>_raw</code>）は<strong>絶対に上書き・削除しない</strong>。変更が必要な場合は別ファイルとして保存し、バージョン番号を付ける。例：<code
+                >20260512_GApng_measure_v2.csv</code
+              >
+            </li>
+            <li>
+              解析スクリプトの変更は日付付きバックアップまたはGit管理を推奨する。例：<code
+                >20260514_MIC_analysis_v2.R</code
+              >
+            </li>
+            <li>
+              大規模なデータ更新・再実験の場合は、新しい日付で新フォルダを作成する。
+            </li>
+            <li>
+              各フォルダに
+              <code>note.txt</code>
+              を置き、実験条件・使用機器・担当者・特記事項を記録することを強く推奨する。
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 06 実験ノートとの連携 -->
+      <div class="section">
+        <div class="section-title">06 — 実験ノートとの連携</div>
+        <div class="card">
+          <ul class="rules-list">
+            <li>
+              実験を実施したら、実験ノートに当該実験の<strong>フォルダ名・主要ファイル名を必ず記載する</strong>。例：「データ保存先：<code>CandidaAuris_Mortality/20260512_GApng/</code>」
+            </li>
+            <li>
+              実験ノートとデータフォルダは1対1で対応するよう管理する。フォルダの
+              <code>note.txt</code>
+              にも対応するノートのページ番号（または日付）を記録するとなお良い。
+            </li>
+            <li>
+              電子実験ノートを使用する場合は、フォルダパスをコピーして貼り付けるか、ハイパーリンクを設定する。
+            </li>
+            <li>
+              画像生データの場合は、顕微鏡の設定・倍率・染色条件などをノートに記録し、ファイル名との対応を明確にする。
+            </li>
+          </ul>
+        </div>
+        <div class="highlight-box">
+          <strong>実験ノート記載例：</strong><br />
+          2026-05-12　GFP蛍光顕微鏡撮影（<i>C. auris</i>
+          CBS10913株、40×対物、GFPフィルタ）<br />
+          → データ：<code>CandidaAuris_Mortality/20260512_GApng/</code><br />
+          　　画像：<code>20260512_GApng_001.png</code> 〜 <code>_005.png</code
+          ><br />
+          　　計測値：<code>20260512_GApng_measure.csv</code>
+        </div>
+      </div>
+
+      <!-- 07 共有フォルダ vs 個人フォルダ -->
+      <div class="section">
+        <div class="section-title">07 — 共有フォルダ vs 個人フォルダ</div>
+        <div class="card">
+          <ul class="rules-list">
+            <li>
+              現時点では各自のローカルPC上で管理する。共有フォルダ運用の詳細は今後検討する。
+            </li>
+            <li>
+              卒業・異動の際は、フォルダ構造とファイルの説明を文書化して次の担当者に引き継ぐこと。引き継ぎ前に必ずバックアップを取得する（→
+              08節参照）。
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 08 バックアップ -->
+      <div class="section">
+        <div class="section-title">08 — バックアップ</div>
+
+        <div class="card">
+          <ul class="rules-list">
+            <li>
+              バックアップの範囲・頻度の詳細は今後検討する。以下は現時点での基本方針として参考にすること。
+            </li>
+            <li>
+              Macにつながっているローカル外付けHDDへのバックアップを基本とする。macOSでは
+              <strong>Time Machine</strong> の利用を推奨。
+            </li>
+            <li>
+              クラウドストレージ（OneDrive / Google Drive
+              等）への個人バックアップも推奨する。大容量の生画像データは除外してよい。
+            </li>
+            <li>
+              <strong>論文投稿時・修士論文提出時、および卒業・異動時</strong
+              >のバックアップについては、09節のアーカイブ手順を参照すること。
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 09 論文投稿時のアーカイブ・DMP -->
+      <div class="section">
+        <div class="section-title">09 — 論文投稿時のアーカイブ・DMP</div>
+
+        <div class="card">
+          <h3>アーカイブの手順</h3>
+          <ul class="step-list">
+            <li>
+              <div class="step-num">1</div>
+              <div>
+                <strong>アーカイブフォルダの作成</strong><br />
+                アーカイブ専用バックアップフォルダ内に
+                <code>YYYYMMDD_Name_Theme/</code>
+                形式でアーカイブフォルダを作成し、論文に使用したすべてのデータ・解析スクリプト・図を格納する。<br />
+                例：<code>Archive/20260901_Kaneko_CaursSubmission/</code>
+              </div>
+            </li>
+            <li>
+              <div class="step-num">2</div>
+              <div>
+                <strong>アーカイブ内容</strong><br />
+                生データ（<code>_raw</code>）、解析スクリプト、最終図（<code>_fig</code>）、補足データ、投稿バージョンの原稿（PDF）を含める。<code
+                  >README.txt</code
+                >
+                に各ファイルの説明と論文中での使用箇所を記載する。
+              </div>
+            </li>
+            <li>
+              <div class="step-num">3</div>
+              <div>
+                <strong>バックアップの取得</strong><br />
+                アーカイブフォルダを外付けHDDおよびクラウドにバックアップする（→
+                08節）。論文投稿時・修士論文提出時、卒業・異動時のいずれもこのアーカイブ手順に準拠する。査読・改訂のたびにバージョンを更新し、旧バージョンは削除せず保持する。例：<code
+                  >20261015_Kaneko_CaursRevision1/</code
+                >
+              </div>
+            </li>
+            <li>
+              <div class="step-num">4</div>
+              <div>
+                <strong>DMP（データ管理計画）への記載</strong><br />
+                所定のDMPツールに、アーカイブフォルダ名・データの種類・形式・保管場所を記載し、mdファイルとして保存する。例：<code
+                  >20260901_Kaneko_CaursSubmission_DMP.md</code
+                >
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="green-box">
+          <strong>アーカイブフォルダ構成例：</strong
+          ><code>20260901_Kaneko_CaursSubmission/</code><br />
+          ├──
+          <code>README.txt</code>　（ファイル説明・保管場所・DMP記載内容）<br />
+          ├── <code>raw_data/</code>　　（生データ一式）<br />
+          ├── <code>scripts/</code>　　　（解析Rスクリプト・Rmd ファイル）<br />
+          ├── <code>figures/</code>　　　（論文掲載図の最終版）<br />
+          └── <code>manuscript_v1.pdf</code>　（投稿バージョン原稿）
+        </div>
+      </div>
+
+      <!-- 10 研究テーマフォルダ命名例 -->
+      <div class="section">
+        <div class="section-title">10 — 研究テーマフォルダ命名例</div>
+        <div class="card">
+          <table class="rule-table">
+            <colgroup>
+              <col style="width: 55%" />
+              <col style="width: 45%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>研究テーマ</th>
+                <th>フォルダ名（推奨）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><i>Candida auris</i> 死亡率・菌血症</td>
+                <td><code>CandidaAuris_Mortality</code></td>
+              </tr>
+              <tr>
+                <td><i>Acinetobacter baumannii</i> 莢膜転換</td>
+                <td><code>Acinetobacter_Capsule</code></td>
+              </tr>
+              <tr>
+                <td>びまん性肺疾患マイコバイオーム</td>
+                <td><code>Mycobiome_DiffuseLungDisease</code></td>
+              </tr>
+              <tr>
+                <td>多剤耐性緑膿菌（MDRP）</td>
+                <td><code>MDRP_ResistanceMechanism</code></td>
+              </tr>
+              <tr>
+                <td>真菌同定地域ハブ</td>
+                <td><code>FungalID_RegionalHub</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- /container -->
+
+    <footer>
+      <p>
+        本テキストは AI（Claude,
+        Anthropic）を用いて作成されました。内容には誤りが含まれる可能性があります。医療上の判断には必ず公式の教科書・文献・専門家の指導を参照してください。二次利用・再配布は自己責任のもとで可能です。その際、本注記の保持を推奨します。
+      </p>
+    </footer>
+  </body>
+</html>
